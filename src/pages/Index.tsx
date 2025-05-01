@@ -6,6 +6,7 @@ import HeroSection from '@/components/HeroSection';
 import FeaturesSection from '@/components/FeaturesSection';
 import PricingSection from '@/components/PricingSection';
 import TestimonialSection from '@/components/TestimonialSection';
+import MarPointsSection from '@/components/MarPointsSection';
 
 const Index = () => {
   return (
@@ -13,6 +14,7 @@ const Index = () => {
       <NavBar />
       <main>
         <HeroSection />
+        <MarPointsSection />
         <FeaturesSection />
         <PricingSection />
         <TestimonialSection />

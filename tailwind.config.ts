@@ -68,7 +68,8 @@ export default {
 					gold: '#f59e0b',
 					lightblue: '#93c5fd',
 					navy: '#0f2c59',
-					cream: '#fff8e6'
+					cream: '#fff8e6',
+                    gray: '#4b5563'
 				}
 			},
 			borderRadius: {
@@ -115,4 +116,3 @@ export default {
 	},
 	plugins: [require("tailwindcss-animate")],
 } satisfies Config;
-

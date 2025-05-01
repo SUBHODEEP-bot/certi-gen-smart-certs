@@ -127,3 +127,53 @@
   }
 }
 
+/* Engineering Theme Additions */
+.gear-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 37.5c-6.904 0-12.5 5.596-12.5 12.5 0 6.904 5.596 12.5 12.5 12.5 6.904 0 12.5-5.596 12.5-12.5 0-6.904-5.596-12.5-12.5-12.5zm0 29.167c-9.205 0-16.667-7.462-16.667-16.667S40.795 33.333 50 33.333 66.667 40.795 66.667 50 59.205 66.667 50 66.667zm33.333-18.75h-4.375c-.542-2.5-1.375-4.917-2.5-7.167l3.083-3.083c1.459-1.458 1.459-3.792 0-5.25l-5.25-5.25c-1.458-1.458-3.792-1.458-5.25 0l-3.083 3.083c-2.25-1.125-4.667-1.958-7.167-2.5V23.375c0-2.083-1.666-3.75-3.75-3.75h-7.5c-2.084 0-3.75 1.667-3.75 3.75v4.375c-2.5.542-4.916 1.375-7.166 2.5l-3.084-3.083c-1.458-1.458-3.791-1.458-5.25 0l-5.25 5.25c-1.458 1.458-1.458 3.792 0 5.25l3.084 3.083c-1.125 2.25-1.959 4.667-2.5 7.167h-4.375c-2.084 0-3.75 1.666-3.75 3.75v7.5c0 2.083 1.666 3.75 3.75 3.75h4.375c.541 2.5 1.375 4.916 2.5 7.166l-3.084 3.084c-1.458 1.458-1.458 3.791 0 5.25l5.25 5.25c1.459 1.458 3.792 1.458 5.25 0l3.084-3.084c2.25 1.125 4.666 1.959 7.166 2.5v4.375c0 2.084 1.666 3.75 3.75 3.75h7.5c2.084 0 3.75-1.666 3.75-3.75v-4.375c2.5-.541 4.917-1.375 7.167-2.5l3.083 3.084c1.458 1.458 3.792 1.458 5.25 0l5.25-5.25c1.459-1.459 1.459-3.792 0-5.25l-3.083-3.084c1.125-2.25 1.958-4.666 2.5-7.166h4.375c2.083 0 3.75-1.667 3.75-3.75v-7.5c0-2.084-1.667-3.75-3.75-3.75z' fill='%231a56db' fill-opacity='0.05'/%3E%3C/svg%3E");
+}
+
+.tech-bg {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.hero-gradient {
+  background: linear-gradient(90deg, #1a56db 0%, #3182ce 100%);
+}
+
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.bounce-in {
+  animation: bounce-in 1s ease;
+}
+
+@keyframes bounce-in {
+  0% { transform: scale(0.8); opacity: 0; }
+  60% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+.floating {
+  animation: floating 3s ease-in-out infinite;
+}
+
+@keyframes floating {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+  100% { transform: translateY(0px); }
+}
+
+.spin-slow {
+  animation: spin 10s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
