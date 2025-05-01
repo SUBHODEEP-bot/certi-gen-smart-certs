@@ -15,14 +15,31 @@ export const generateCertificateId = () => {
   return `CERT-${result}`;
 };
 
+// MAR Points system
+export const getMarPointsForActivity = (activity: string): number => {
+  const marPointsMap: Record<string, number> = {
+    "Internship": 10,
+    "Hackathon": 8,
+    "Webinar": 5,
+    "Online Course": 7,
+    "Volunteer Work": 6,
+    "Innovation": 9,
+    "Workshop": 6,
+    "Project": 10
+  };
+  
+  return marPointsMap[activity] || 5; // Default to 5 points if activity not found
+};
+
 export interface CertificateData {
   fullName: string;
   activity: string;
   activityDate: Date;
+  certificateText?: string;
 }
 
 export const generatePdf = (certificateData: CertificateData, certificateId: string) => {
-  const { fullName, activity, activityDate } = certificateData;
+  const { fullName, activity, activityDate, certificateText } = certificateData;
   const doc = new jsPDF({
     orientation: 'landscape',
     unit: 'mm',
@@ -56,35 +73,36 @@ export const generatePdf = (certificateData: CertificateData, certificateId: str
   doc.setLineWidth(1);
   doc.line(pageWidth / 2 - 30, 55, pageWidth / 2 + 30, 55);
   
-  // Certificate text
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(14);
-  doc.setTextColor(60, 60, 60);
-  doc.text("This is to certify that", pageWidth / 2, 70, { align: "center" });
-  
   // Recipient name
   doc.setFont("helvetica", "bold");
   doc.setFontSize(24);
   doc.setTextColor(26, 86, 219);
-  doc.text(fullName, pageWidth / 2, 85, { align: "center" });
+  doc.text(fullName, pageWidth / 2, 70, { align: "center" });
   
-  // Certificate text continued
+  // Certificate text (AI-generated text)
+  const maxWidth = pageWidth - (margin * 6);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(14);
+  doc.setFontSize(12);
   doc.setTextColor(60, 60, 60);
-  doc.text("has successfully participated in", pageWidth / 2, 100, { align: "center" });
   
-  // Activity
+  if (certificateText) {
+    const splitText = doc.splitTextToSize(certificateText, maxWidth);
+    doc.text(splitText, pageWidth / 2, 85, { align: "center" });
+  } else {
+    // Fallback certificate text if no AI-generated text
+    doc.text("This is to certify that the above named individual has successfully", pageWidth / 2, 85, { align: "center" });
+    doc.text(`participated in the ${activity} on ${format(activityDate, 'd MMMM yyyy')}.`, pageWidth / 2, 92, { align: "center" });
+  }
+  
+  // MAR Points badge
+  const marPoints = getMarPointsForActivity(activity);
+  doc.setFillColor(240, 249, 255);
+  doc.setDrawColor(147, 197, 253);
+  doc.roundedRect(pageWidth / 2 - 30, 110, 60, 15, 5, 5, 'FD');
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(18);
-  doc.setTextColor(15, 44, 89); // Navy color
-  doc.text(activity, pageWidth / 2, 115, { align: "center" });
-  
-  // Date
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(14);
-  doc.setTextColor(60, 60, 60);
-  doc.text(`on ${format(activityDate, 'd MMMM yyyy')}`, pageWidth / 2, 130, { align: "center" });
+  doc.setTextColor(26, 86, 219);
+  doc.setFontSize(11);
+  doc.text(`${activity}: ${marPoints} MAR Points`, pageWidth / 2, 119, { align: "center" });
   
   // Signatures
   doc.setLineWidth(0.5);

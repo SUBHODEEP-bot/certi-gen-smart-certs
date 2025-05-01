@@ -2,11 +2,13 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { cn } from "@/lib/utils";
+import { getMarPointsForActivity } from '@/utils/certificate';
 
 interface CertificateData {
   fullName?: string;
   activity?: string;
   activityDate?: Date;
+  certificateText?: string;
 }
 
 interface CertificatePreviewProps {
@@ -28,6 +30,8 @@ export default function CertificatePreview({
   const date = certificateData?.activityDate 
     ? format(certificateData.activityDate, "d MMMM yyyy") 
     : "Date of Activity";
+  const marPoints = certificateData?.activity ? getMarPointsForActivity(certificateData.activity) : 0;
+  const certificateText = certificateData?.certificateText || "Certificate description will appear here after generation.";
 
   return (
     <div className={cn(
@@ -47,27 +51,29 @@ export default function CertificatePreview({
           </div>
         </div>
         
-        <div className="flex flex-col items-center mb-8">
+        <div className="flex flex-col items-center mb-6">
           <h1 className="text-2xl md:text-3xl font-bold mb-1 text-certigen-navy">CERTIFICATE</h1>
           <h2 className="text-xl md:text-2xl font-semibold mb-1 text-certigen-navy">OF ACHIEVEMENT</h2>
           <div className="w-24 h-1 bg-certigen-gold mb-4"></div>
         </div>
         
-        <p className="text-lg mb-2">This is to certify that</p>
-        
-        <h2 className="text-3xl md:text-4xl font-certificate font-bold mb-4 text-certigen-blue">
+        <h2 className="text-3xl md:text-4xl font-certificate font-bold mb-3 text-certigen-blue">
           {name}
         </h2>
         
-        <p className="text-lg mb-4">has successfully participated in</p>
+        <div className="mb-4 px-4 text-sm md:text-base text-certigen-gray">
+          {certificateText}
+        </div>
         
-        <h3 className="text-xl md:text-2xl font-semibold mb-4 text-certigen-navy">
-          {activity}
-        </h3>
+        {activity && (
+          <div className="my-3 border border-certigen-lightblue bg-blue-50 px-4 py-2 rounded-full flex items-center justify-center">
+            <span className="font-medium text-certigen-blue">{activity}</span>
+            <div className="mx-2 h-4 w-px bg-certigen-lightblue"></div>
+            <span className="text-certigen-gold font-bold">{marPoints} MAR Points</span>
+          </div>
+        )}
         
-        <p className="text-lg mb-8">on {date}</p>
-        
-        <div className="flex w-full justify-around mb-8">
+        <div className="flex w-full justify-around mb-6 mt-6">
           <div className="flex flex-col items-center">
             <div className="w-36 border-b border-gray-400 pb-1 mb-1">
               <p className="font-certificate italic">{randomSignature}</p>

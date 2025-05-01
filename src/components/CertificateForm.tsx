@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { z } from "zod";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -34,6 +34,7 @@ import {
 
 import CertificatePreview from './CertificatePreview';
 import { toast } from '@/hooks/use-toast';
+import { getMarPointsForActivity } from '@/utils/certificate';
 
 const formSchema = z.object({
   fullName: z.string().min(2, {
@@ -45,6 +46,7 @@ const formSchema = z.object({
   activityDate: z.date({
     required_error: "Date of activity is required.",
   }),
+  certificateText: z.string().optional(),
 });
 
 type CertificateFormValues = z.infer<typeof formSchema>;
@@ -66,12 +68,14 @@ const activityOptions = [
 
 export default function CertificateForm({ onSubmit, isGenerating }: CertificateFormProps) {
   const [previewData, setPreviewData] = useState<CertificateFormValues | null>(null);
+  const [isGeneratingText, setIsGeneratingText] = useState(false);
   
   const form = useForm<CertificateFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       fullName: "",
       activity: "",
+      certificateText: "",
     },
   });
 
@@ -81,6 +85,55 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
       title: "Preview updated",
       description: "Your certificate preview has been updated.",
     });
+  }
+
+  async function generateCertificateText() {
+    const values = form.getValues();
+    
+    // Check if required fields are provided
+    if (!values.fullName || !values.activity || !values.activityDate) {
+      toast({
+        title: "Fill all fields",
+        description: "Please fill all required fields to generate certificate text.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsGeneratingText(true);
+    
+    try {
+      // In a real app, this would make an API call to an AI service
+      // For now we'll use a simulated response
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call
+      
+      const formattedDate = format(values.activityDate, "MMMM d, yyyy");
+      
+      // Generate a professional-sounding certificate text
+      const generatedText = `This is to certify that ${values.fullName} has successfully participated in the ${values.activity} conducted on ${formattedDate}. The candidate has demonstrated exceptional skills and knowledge throughout this program, meeting all the necessary requirements as per academic standards recognized by MAKAUT. This achievement is worth ${getMarPointsForActivity(values.activity)} MAR Points.`;
+      
+      // Update the form with the generated text
+      form.setValue("certificateText", generatedText);
+      
+      // Update preview
+      handlePreview({
+        ...values,
+        certificateText: generatedText
+      });
+      
+      toast({
+        title: "Text Generated",
+        description: "Certificate text has been generated successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Text Generation Failed",
+        description: "There was an error generating the certificate text. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGeneratingText(false);
+    }
   }
 
   function handleSubmit(values: CertificateFormValues) {
@@ -126,7 +179,7 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
                       <SelectContent>
                         {activityOptions.map((activity) => (
                           <SelectItem key={activity} value={activity}>
-                            {activity}
+                            {activity} ({getMarPointsForActivity(activity)} MAR points)
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -178,6 +231,44 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
                   </FormItem>
                 )}
               />
+
+              <div className="pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full bg-certigen-cream hover:bg-certigen-cream/80 border-certigen-gold text-certigen-navy"
+                  onClick={generateCertificateText}
+                  disabled={isGeneratingText}
+                >
+                  {isGeneratingText ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Generating Text...
+                    </>
+                  ) : (
+                    "Generate Certificate Text with AI"
+                  )}
+                </Button>
+              </div>
+
+              <FormField
+                control={form.control}
+                name="certificateText"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Certificate Text</FormLabel>
+                    <FormControl>
+                      <textarea 
+                        {...field} 
+                        rows={4}
+                        placeholder="Generate text or write your own certificate description..."
+                        className="w-full border rounded-md p-2 border-certigen-lightblue focus-visible:ring-certigen-blue text-sm focus:outline-none focus:ring-2" 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               
               <div className="flex space-x-4 pt-4">
                 <Button 
@@ -203,7 +294,7 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
                 <Button 
                   type="submit" 
                   className="flex-1 bg-certigen-blue hover:bg-certigen-navy"
-                  disabled={isGenerating}
+                  disabled={isGenerating || !form.getValues().certificateText}
                 >
                   {isGenerating ? "Generating..." : "Pay ₹5 & Generate"}
                 </Button>
