@@ -2,7 +2,7 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { cn } from "@/lib/utils";
-import { BadgeCheck, QrCode } from 'lucide-react';
+import { QrCode, Stamp } from 'lucide-react';
 
 interface CertificateData {
   fullName?: string;
@@ -33,64 +33,62 @@ export default function CertificatePreview({
 
   // Choose stamp and signature based on activity type
   const getStampAndSignature = (activityType?: string) => {
-    // Default values
-    const defaultStamp = "/placeholder.svg";
-    const defaultSignature = "/placeholder.svg";
-    const defaultSigner = "Program Director";
+    // Using consistent CertiGen stamp for all certificates
+    const certiGenStamp = "/certigen_stamp.png";
     
     if (!activityType) return { 
-      stamp: defaultStamp, 
-      signature: defaultSignature,
-      signer: "Priya Sharma",
-      title: defaultSigner 
+      stamp: certiGenStamp, 
+      signature: "/placeholder.svg",
+      signer: "ASHOK KUMAR GHOSH",
+      title: "Program Director" 
     };
     
     switch (activityType.toLowerCase()) {
       case 'internship':
         return { 
-          stamp: "/internship_stamp.png", 
+          stamp: certiGenStamp, 
           signature: "/ananya_signature.png",
-          signer: "M.R Sumit Kumar Biswas",
+          signer: "D.R. KUHELI MONDAL",
           title: "Internship Director" 
         };
       case 'webinar':
       case 'online course':
       case 'workshop':
         return { 
-          stamp: "/webinar_stamp.png", 
+          stamp: certiGenStamp, 
           signature: "/priya_signature.png",
-          signer: "Subham Mallick",
+          signer: "D.R. DIPAK KUMAR MONDAL",
           title: "Course Director" 
         };
       case 'hackathon':
         return { 
-          stamp: "/hackathon_stamp.png", 
+          stamp: certiGenStamp, 
           signature: "/ramesh_signature.png",
-          signer: "S.PAL",
+          signer: "DILIP KUMAR GHOSH",
           title: "Hackathon Director" 
         };
       case 'volunteering':
       case 'volunteer work':
         return { 
-          stamp: "/volunteer_stamp.png", 
+          stamp: certiGenStamp, 
           signature: "/volunteer_signature.png",
-          signer: "Ananya Singh",
+          signer: "SOURAV YADAV",
           title: "Volunteer Program Director" 
         };
       case 'project':
       case 'innovation':
         return { 
-          stamp: "/project_stamp.png", 
+          stamp: certiGenStamp, 
           signature: "/project_signature.png",
-          signer: "Rajesh Kumar",
+          signer: "ANINDITA BHATTACHARYA",
           title: "Innovation Lead" 
         };
       default:
         return { 
-          stamp: defaultStamp, 
-          signature: defaultSignature,
-          signer: "Priya Sharma",
-          title: defaultSigner 
+          stamp: certiGenStamp, 
+          signature: "/priya_signature.png",
+          signer: "ASHOK KUMAR GHOSH",
+          title: "Program Director" 
         };
     }
   };
@@ -129,7 +127,8 @@ export default function CertificatePreview({
         </h2>
         
         <div className="mb-4 px-8 text-sm md:text-base text-certigen-gray max-w-2xl">
-          {certificateText}
+          {/* Ensure no MAR points are mentioned in the text */}
+          {certificateText.replace(/\b\d+\s*MAR\s*Points\b/gi, '').replace(/This achievement is worth.*?points\./gi, '')}
         </div>
         
         {activity && (
@@ -169,15 +168,23 @@ export default function CertificatePreview({
             <p className="text-sm text-gray-600">Executive Director</p>
           </div>
 
-          {/* Official Stamp - positioned at bottom right */}
+          {/* Official CertiGen Stamp - positioned at bottom right */}
           <div className="absolute bottom-12 right-12 flex flex-col items-center">
-            <div className="w-24 h-24 opacity-80">
-              <img src={stamp} alt="Official Stamp" className="w-full h-full object-contain" />
+            <div className="w-24 h-24 opacity-80 bg-white bg-opacity-50 rounded-full flex items-center justify-center">
+              {/* If the stamp image exists, use it */}
+              {stamp ? (
+                <img src={stamp} alt="Official Stamp" className="w-20 h-20 object-contain" />
+              ) : (
+                <div className="flex flex-col items-center justify-center">
+                  <Stamp className="h-12 w-12 text-certigen-navy opacity-80" />
+                  <p className="text-xs text-certigen-navy font-bold mt-1">CERTIGEN</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
         
-        {/* Bottom Section with QR Code and Certificate Details */}
+        {/* Bottom Section with QR Code and Certificate Details - improved positioning */}
         <div className="absolute bottom-6 left-6 flex items-start">
           {/* QR Code */}
           <div className="bg-white p-1 rounded-md shadow-sm mr-4">
@@ -189,7 +196,6 @@ export default function CertificatePreview({
           {/* Certificate Details */}
           <div className="text-left">
             <div className="flex items-center text-certigen-blue text-xs mb-1">
-              <BadgeCheck className="mr-1 h-4 w-4" />
               <span>Digitally verified certificate</span>
             </div>
             <p className="text-xs text-gray-500">Certificate ID: {certificateId}</p>

@@ -1,4 +1,3 @@
-
 import { jsPDF } from 'jspdf';
 import { format } from 'date-fns';
 
@@ -17,55 +16,54 @@ export const generateCertificateId = () => {
 
 // Get stamp and signature based on activity
 export const getAssetsByActivityType = (activity: string) => {
-  // Default values
-  const defaultStamp = "/placeholder.svg";
-  const defaultSignature = "/placeholder.svg";
+  // Common stamp for all certificates
+  const certiGenStamp = "/certigen_stamp.png"; // This would be a consistent stamp with the CertiGen logo
   
   switch (activity.toLowerCase()) {
     case 'internship':
       return { 
-        stamp: "/internship_stamp.png", 
+        stamp: certiGenStamp, 
         signature: "/ananya_signature.png",
-        signer: "M.R Sumit Kumar Biswas",
+        signer: "D.R. KUHELI MONDAL",
         title: "Internship Director"
       };
     case 'webinar':
     case 'online course':
     case 'workshop':
       return { 
-        stamp: "/webinar_stamp.png", 
+        stamp: certiGenStamp, 
         signature: "/priya_signature.png",
-        signer: "Subham Mallick",
+        signer: "D.R. DIPAK KUMAR MONDAL",
         title: "Course Director"
       };
     case 'hackathon':
       return { 
-        stamp: "/hackathon_stamp.png", 
+        stamp: certiGenStamp, 
         signature: "/ramesh_signature.png",
-        signer: "S.PAL",
+        signer: "DILIP KUMAR GHOSH",
         title: "Hackathon Director"
       };
     case 'volunteering':
     case 'volunteer work':
       return { 
-        stamp: "/volunteer_stamp.png", 
+        stamp: certiGenStamp, 
         signature: "/volunteer_signature.png",
-        signer: "Ananya Singh",
+        signer: "SOURAV YADAV",
         title: "Volunteer Program Director"
       };
     case 'project':
     case 'innovation':
       return { 
-        stamp: "/project_stamp.png", 
+        stamp: certiGenStamp, 
         signature: "/project_signature.png",
-        signer: "Rajesh Kumar",
+        signer: "ANINDITA BHATTACHARYA",
         title: "Innovation Lead"
       };
     default:
       return { 
-        stamp: defaultStamp, 
-        signature: defaultSignature,
-        signer: "Priya Sharma",
+        stamp: certiGenStamp, 
+        signature: "/priya_signature.png",
+        signer: "ASHOK KUMAR GHOSH",
         title: "Program Director"
       };
   }
@@ -119,9 +117,6 @@ export const generatePdf = (certificateData: CertificateData, certificateId: str
   doc.setLineWidth(3);
   doc.rect(margin, margin, pageWidth - 2 * margin, pageHeight - 2 * margin);
   
-  // Add background pattern (subtle dots)
-  // This is just a placeholder - in a real app you'd add a pattern
-  
   // Certificate heading
   doc.setFont("helvetica", "bold");
   doc.setFontSize(30);
@@ -149,7 +144,11 @@ export const generatePdf = (certificateData: CertificateData, certificateId: str
   doc.setTextColor(60, 60, 60);
   
   if (certificateText) {
-    const splitText = doc.splitTextToSize(certificateText, maxWidth);
+    // Ensure we don't include MAR points in the text
+    let cleanedText = certificateText.replace(/\b\d+\s*MAR\s*Points\b/gi, '');
+    cleanedText = cleanedText.replace(/This achievement is worth.*?points\./gi, '');
+    
+    const splitText = doc.splitTextToSize(cleanedText, maxWidth);
     doc.text(splitText, pageWidth / 2, 85, { align: "center" });
   } else {
     // Fallback certificate text if no AI-generated text
@@ -191,29 +190,27 @@ export const generatePdf = (certificateData: CertificateData, certificateId: str
   doc.setFontSize(10);
   doc.text(title, pageWidth - 90, 165, { align: "center" });
   
-  // Certificate ID and date - moved to bottom left
+  // Certificate ID and date - positioned at bottom left
   doc.setFontSize(10);
   doc.setTextColor(100, 100, 100);
   doc.text(`Certificate ID: ${certificateId}`, margin + 5, pageHeight - 15);
   doc.text(`Issue Date: ${format(new Date(), 'd MMMM yyyy')}`, margin + 5, pageHeight - 10);
   
-  // QR Code - moved to bottom right corner
+  // QR Code - positioned at bottom right corner
   doc.setFillColor(240, 240, 240);
   doc.roundedRect(pageWidth - margin - 25, pageHeight - margin - 25, 20, 20, 2, 2, 'F');
   doc.setFontSize(6);
   doc.setTextColor(150, 150, 150);
   doc.text("QR Code", pageWidth - margin - 15, pageHeight - margin - 15, { align: "center" });
   
-  // Add appropriate stamp based on certificate type
-  const { stamp } = getAssetsByActivityType(activity);
-  // In a real implementation, you would load the stamp image
-  // For now, we'll add a placeholder for the stamp
+  // Add CertiGen stamp in a prominent position
   doc.setFillColor(230, 230, 230, 0.5);
   doc.setDrawColor(200, 200, 200);
   doc.roundedRect(pageWidth - margin - 40, pageHeight - margin - 40, 35, 35, 3, 3, 'FD');
   doc.setFontSize(8);
   doc.setTextColor(150, 150, 150);
-  doc.text("Official Stamp", pageWidth - margin - 22.5, pageHeight - margin - 22.5, { align: "center" });
+  doc.text("CertiGen Official", pageWidth - margin - 22.5, pageHeight - margin - 25, { align: "center" });
+  doc.text("Stamp", pageWidth - margin - 22.5, pageHeight - margin - 20, { align: "center" });
   
   // Footer
   doc.setFontSize(8);
