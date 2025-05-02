@@ -23,12 +23,63 @@ export const getMarPointsForActivity = (activity: string): number => {
     "Webinar": 5,
     "Online Course": 7,
     "Volunteer Work": 6,
+    "Volunteering": 6,
     "Innovation": 9,
     "Workshop": 6,
     "Project": 10
   };
   
   return marPointsMap[activity] || 5; // Default to 5 points if activity not found
+};
+
+// Get stamp and signature based on activity
+export const getAssetsByActivityType = (activity: string) => {
+  // In a real app, these would be actual URLs or imported assets
+  const defaultStamp = "/placeholder.svg";
+  const defaultSignature = "/placeholder.svg";
+  
+  switch (activity.toLowerCase()) {
+    case 'internship':
+      return { 
+        stamp: defaultStamp, 
+        signature: defaultSignature,
+        signer: "Industry Mentor"
+      };
+    case 'webinar':
+    case 'online course':
+    case 'workshop':
+      return { 
+        stamp: defaultStamp, 
+        signature: defaultSignature,
+        signer: "Course Instructor"
+      };
+    case 'hackathon':
+      return { 
+        stamp: defaultStamp, 
+        signature: defaultSignature,
+        signer: "Event Organizer"
+      };
+    case 'volunteering':
+    case 'volunteer work':
+      return { 
+        stamp: defaultStamp, 
+        signature: defaultSignature,
+        signer: "Volunteer Coordinator"
+      };
+    case 'project':
+    case 'innovation':
+      return { 
+        stamp: defaultStamp, 
+        signature: defaultSignature,
+        signer: "Project Mentor"
+      };
+    default:
+      return { 
+        stamp: defaultStamp, 
+        signature: defaultSignature,
+        signer: "Program Coordinator"
+      };
+  }
 };
 
 export interface CertificateData {
@@ -104,6 +155,9 @@ export const generatePdf = (certificateData: CertificateData, certificateId: str
   doc.setFontSize(11);
   doc.text(`${activity}: ${marPoints} MAR Points`, pageWidth / 2, 119, { align: "center" });
   
+  // Get custom assets based on activity type
+  const { signer } = getAssetsByActivityType(activity);
+  
   // Signatures
   doc.setLineWidth(0.5);
   doc.setDrawColor(100, 100, 100);
@@ -124,7 +178,7 @@ export const generatePdf = (certificateData: CertificateData, certificateId: str
   doc.text("Jane Smith", pageWidth - 90, 158, { align: "center" });
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  doc.text("Program Coordinator", pageWidth - 90, 165, { align: "center" });
+  doc.text(signer, pageWidth - 90, 165, { align: "center" });
   
   // Certificate ID and date
   doc.setFontSize(10);
@@ -132,10 +186,18 @@ export const generatePdf = (certificateData: CertificateData, certificateId: str
   doc.text(`Certificate ID: ${certificateId}`, margin + 5, 25);
   doc.text(`Issue Date: ${format(new Date(), 'd MMMM yyyy')}`, pageWidth - margin - 5, 25, { align: "right" });
   
+  // QR Code (placeholder - in a real app you'd generate and place a QR code image)
+  doc.setFillColor(240, 240, 240);
+  doc.roundedRect(pageWidth - margin - 25, margin + 5, 20, 20, 2, 2, 'F');
+  doc.setFontSize(6);
+  doc.setTextColor(150, 150, 150);
+  doc.text("QR Code", pageWidth - margin - 15, margin + 15, { align: "center" });
+  
   // Footer
   doc.setFontSize(8);
   doc.setTextColor(150, 150, 150);
   doc.text("Powered by CertiGen - Instant Certificate Generator", pageWidth / 2, pageHeight - 15, { align: "center" });
+  doc.text("Verify this certificate at: certiverify.makaut.edu", pageWidth / 2, pageHeight - 10, { align: "center" });
   
   return doc;
 };
