@@ -1,3 +1,4 @@
+
 import { jsPDF } from 'jspdf';
 import { format } from 'date-fns';
 
@@ -25,7 +26,8 @@ export const getAssetsByActivityType = (activity: string) => {
       return { 
         stamp: "/internship_stamp.png", 
         signature: "/ananya_signature.png",
-        signer: "Internship Coordinator"
+        signer: "M.R Sumit Kumar Biswas",
+        title: "Internship Director"
       };
     case 'webinar':
     case 'online course':
@@ -33,33 +35,38 @@ export const getAssetsByActivityType = (activity: string) => {
       return { 
         stamp: "/webinar_stamp.png", 
         signature: "/priya_signature.png",
-        signer: "Course Instructor"
+        signer: "Subham Mallick",
+        title: "Course Director"
       };
     case 'hackathon':
       return { 
         stamp: "/hackathon_stamp.png", 
         signature: "/ramesh_signature.png",
-        signer: "Event Organizer"
+        signer: "S.PAL",
+        title: "Hackathon Director"
       };
     case 'volunteering':
     case 'volunteer work':
       return { 
         stamp: "/volunteer_stamp.png", 
         signature: "/volunteer_signature.png",
-        signer: "Volunteer Coordinator"
+        signer: "Ananya Singh",
+        title: "Volunteer Program Director"
       };
     case 'project':
     case 'innovation':
       return { 
         stamp: "/project_stamp.png", 
         signature: "/project_signature.png",
-        signer: "Project Mentor"
+        signer: "Rajesh Kumar",
+        title: "Innovation Lead"
       };
     default:
       return { 
         stamp: defaultStamp, 
         signature: defaultSignature,
-        signer: "Program Coordinator"
+        signer: "Priya Sharma",
+        title: "Program Director"
       };
   }
 };
@@ -160,7 +167,7 @@ export const generatePdf = (certificateData: CertificateData, certificateId: str
   doc.text(activity, pageWidth / 2, 119, { align: "center" });
   
   // Get custom assets based on activity type
-  const { signer } = getAssetsByActivityType(activity);
+  const { signer, title } = getAssetsByActivityType(activity);
   
   // Signatures
   doc.setLineWidth(0.5);
@@ -170,7 +177,7 @@ export const generatePdf = (certificateData: CertificateData, certificateId: str
   doc.line(60, 160, 120, 160);
   doc.setFont("helvetica", "italic");
   doc.setFontSize(12);
-  doc.text("Prof. John Smith", 90, 158, { align: "center" });
+  doc.text("M.R Sumit Kumar Biswas", 90, 158, { align: "center" });
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.text("Director", 90, 165, { align: "center" });
@@ -179,29 +186,39 @@ export const generatePdf = (certificateData: CertificateData, certificateId: str
   doc.line(pageWidth - 120, 160, pageWidth - 60, 160);
   doc.setFont("helvetica", "italic");
   doc.setFontSize(12);
-  doc.text("Dr. Sarah Johnson", pageWidth - 90, 158, { align: "center" });
+  doc.text(signer, pageWidth - 90, 158, { align: "center" });
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  doc.text(signer, pageWidth - 90, 165, { align: "center" });
+  doc.text(title, pageWidth - 90, 165, { align: "center" });
   
-  // Certificate ID and date
+  // Certificate ID and date - moved to bottom left
   doc.setFontSize(10);
   doc.setTextColor(100, 100, 100);
-  doc.text(`Certificate ID: ${certificateId}`, margin + 5, 25);
-  doc.text(`Issue Date: ${format(new Date(), 'd MMMM yyyy')}`, pageWidth - margin - 5, 25, { align: "right" });
+  doc.text(`Certificate ID: ${certificateId}`, margin + 5, pageHeight - 15);
+  doc.text(`Issue Date: ${format(new Date(), 'd MMMM yyyy')}`, margin + 5, pageHeight - 10);
   
-  // QR Code (placeholder - in a real app you'd generate and place a QR code image)
+  // QR Code - moved to bottom right corner
   doc.setFillColor(240, 240, 240);
-  doc.roundedRect(pageWidth - margin - 25, margin + 5, 20, 20, 2, 2, 'F');
+  doc.roundedRect(pageWidth - margin - 25, pageHeight - margin - 25, 20, 20, 2, 2, 'F');
   doc.setFontSize(6);
   doc.setTextColor(150, 150, 150);
-  doc.text("QR Code", pageWidth - margin - 15, margin + 15, { align: "center" });
+  doc.text("QR Code", pageWidth - margin - 15, pageHeight - margin - 15, { align: "center" });
+  
+  // Add appropriate stamp based on certificate type
+  const { stamp } = getAssetsByActivityType(activity);
+  // In a real implementation, you would load the stamp image
+  // For now, we'll add a placeholder for the stamp
+  doc.setFillColor(230, 230, 230, 0.5);
+  doc.setDrawColor(200, 200, 200);
+  doc.roundedRect(pageWidth - margin - 40, pageHeight - margin - 40, 35, 35, 3, 3, 'FD');
+  doc.setFontSize(8);
+  doc.setTextColor(150, 150, 150);
+  doc.text("Official Stamp", pageWidth - margin - 22.5, pageHeight - margin - 22.5, { align: "center" });
   
   // Footer
   doc.setFontSize(8);
   doc.setTextColor(150, 150, 150);
-  doc.text("Powered by CertiGen - Professional Certificate Generator", pageWidth / 2, pageHeight - 15, { align: "center" });
-  doc.text("Verify this certificate at: certiverify.example.com", pageWidth / 2, pageHeight - 10, { align: "center" });
+  doc.text("Powered by CertiGen - Professional Certificate Generator", pageWidth / 2, pageHeight - 5, { align: "center" });
   
   return doc;
 };

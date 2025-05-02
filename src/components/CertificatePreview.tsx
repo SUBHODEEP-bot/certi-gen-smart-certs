@@ -2,7 +2,7 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { cn } from "@/lib/utils";
-import { BadgeCheck } from 'lucide-react';
+import { BadgeCheck, QrCode } from 'lucide-react';
 
 interface CertificateData {
   fullName?: string;
@@ -36,12 +36,13 @@ export default function CertificatePreview({
     // Default values
     const defaultStamp = "/placeholder.svg";
     const defaultSignature = "/placeholder.svg";
-    const defaultSigner = "Director";
+    const defaultSigner = "Program Director";
     
     if (!activityType) return { 
       stamp: defaultStamp, 
       signature: defaultSignature,
-      signer: defaultSigner 
+      signer: "Priya Sharma",
+      title: defaultSigner 
     };
     
     switch (activityType.toLowerCase()) {
@@ -49,46 +50,52 @@ export default function CertificatePreview({
         return { 
           stamp: "/internship_stamp.png", 
           signature: "/ananya_signature.png",
-          signer: "Internship Coordinator" 
+          signer: "M.R Sumit Kumar Biswas",
+          title: "Internship Director" 
         };
       case 'webinar':
+      case 'online course':
+      case 'workshop':
         return { 
           stamp: "/webinar_stamp.png", 
           signature: "/priya_signature.png",
-          signer: "Webinar Host" 
+          signer: "Subham Mallick",
+          title: "Course Director" 
         };
       case 'hackathon':
         return { 
           stamp: "/hackathon_stamp.png", 
           signature: "/ramesh_signature.png",
-          signer: "Event Organizer" 
+          signer: "S.PAL",
+          title: "Hackathon Director" 
         };
       case 'volunteering':
       case 'volunteer work':
         return { 
           stamp: "/volunteer_stamp.png", 
           signature: "/volunteer_signature.png",
-          signer: "Volunteer Coordinator" 
+          signer: "Ananya Singh",
+          title: "Volunteer Program Director" 
         };
       case 'project':
       case 'innovation':
         return { 
           stamp: "/project_stamp.png", 
           signature: "/project_signature.png",
-          signer: "Project Mentor" 
+          signer: "Rajesh Kumar",
+          title: "Innovation Lead" 
         };
       default:
         return { 
           stamp: defaultStamp, 
           signature: defaultSignature,
-          signer: defaultSigner 
+          signer: "Priya Sharma",
+          title: defaultSigner 
         };
     }
   };
 
-  const { stamp, signature, signer } = getStampAndSignature(activity);
-  const randomDirectorName = "Prof. John Smith";
-  const randomCoordinatorName = "Dr. Sarah Johnson";
+  const { stamp, signature, signer, title } = getStampAndSignature(activity);
 
   return (
     <div className={cn(
@@ -96,13 +103,6 @@ export default function CertificatePreview({
       "print:border-4 certificate-print-area",
       className
     )}>
-      {/* QR Code placeholder */}
-      <div className="absolute top-4 right-4 bg-white p-1 rounded-md shadow-sm">
-        <div className="w-16 h-16 bg-gray-200 flex items-center justify-center text-xs text-gray-500">
-          QR Code
-        </div>
-      </div>
-
       <div className="flex flex-col items-center text-center">
         <div className="w-full flex justify-between mb-6">
           <div className="text-certigen-blue">
@@ -142,41 +142,62 @@ export default function CertificatePreview({
         <p className="text-sm text-certigen-gray mb-6">Completed on {date}</p>
         
         {/* Signature Area with enhanced styling */}
-        <div className="flex w-full justify-around mb-6 mt-6">
+        <div className="flex w-full justify-between mb-6 mt-6">
           <div className="flex flex-col items-center">
             <div className="mb-2">
-              {/* Director Stamp */}
+              {/* Director Signature */}
               <div className="w-16 h-16 mx-auto opacity-70">
-                <img src={stamp} alt="Official Stamp" className="w-full h-full object-contain" />
+                <img src={signature} alt="Director Signature" className="w-full h-full object-contain" />
               </div>
             </div>
             <div className="w-36 border-b border-gray-400 pb-1 mb-1">
-              <p className="font-certificate italic">{randomDirectorName}</p>
+              <p className="font-certificate italic">{signer}</p>
             </div>
-            <p className="text-sm text-gray-600">Director</p>
+            <p className="text-sm text-gray-600">{title}</p>
           </div>
           
           <div className="flex flex-col items-center">
             <div className="mb-2">
-              {/* Program Coordinator Signature */}
+              {/* Executive Director Signature */}
               <div className="w-16 h-16 mx-auto opacity-70">
-                <img src={signature} alt="Signature" className="w-full h-full object-contain" />
+                <img src="/ananya_signature.png" alt="Executive Director Signature" className="w-full h-full object-contain" />
               </div>
             </div>
             <div className="w-36 border-b border-gray-400 pb-1 mb-1">
-              <p className="font-certificate italic">{randomCoordinatorName}</p>
+              <p className="font-certificate italic">M.R Sumit Kumar Biswas</p>
             </div>
-            <p className="text-sm text-gray-600">{signer}</p>
+            <p className="text-sm text-gray-600">Executive Director</p>
+          </div>
+
+          {/* Official Stamp - positioned at bottom right */}
+          <div className="absolute bottom-12 right-12 flex flex-col items-center">
+            <div className="w-24 h-24 opacity-80">
+              <img src={stamp} alt="Official Stamp" className="w-full h-full object-contain" />
+            </div>
           </div>
         </div>
         
-        {/* Verification Badge */}
-        <div className="flex items-center justify-center text-certigen-blue text-xs mb-3">
-          <BadgeCheck className="mr-1 h-4 w-4" />
-          <span>Digitally verified certificate</span>
+        {/* Bottom Section with QR Code and Certificate Details */}
+        <div className="absolute bottom-6 left-6 flex items-start">
+          {/* QR Code */}
+          <div className="bg-white p-1 rounded-md shadow-sm mr-4">
+            <div className="w-16 h-16 flex items-center justify-center">
+              <QrCode className="h-12 w-12 text-certigen-navy opacity-80" />
+            </div>
+          </div>
+          
+          {/* Certificate Details */}
+          <div className="text-left">
+            <div className="flex items-center text-certigen-blue text-xs mb-1">
+              <BadgeCheck className="mr-1 h-4 w-4" />
+              <span>Digitally verified certificate</span>
+            </div>
+            <p className="text-xs text-gray-500">Certificate ID: {certificateId}</p>
+            <p className="text-xs text-gray-500">Issue Date: {format(currentDate, "d MMMM yyyy")}</p>
+          </div>
         </div>
         
-        <div className="text-xs text-gray-500 italic mt-2 opacity-60">
+        <div className="text-xs text-gray-500 italic mt-2 opacity-60 absolute bottom-3 right-1/2 transform translate-x-1/2">
           Powered by CertiGen - Professional Certificate Generator
         </div>
       </div>
