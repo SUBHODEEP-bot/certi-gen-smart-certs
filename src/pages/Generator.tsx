@@ -5,7 +5,7 @@ import Footer from '@/components/Footer';
 import CertificateForm from '@/components/CertificateForm';
 import CertificatePreview from '@/components/CertificatePreview';
 import { Button } from '@/components/ui/button';
-import { generateCertificateId, generatePdf, CertificateData } from '@/utils/certificate';
+import { generateCertificateId, generatePdf, CertificateData, getMarPointsForActivity } from '@/utils/certificate';
 import { useToast } from '@/hooks/use-toast';
 import { Download, Mail, Share, Printer, Check, Award } from 'lucide-react';
 
