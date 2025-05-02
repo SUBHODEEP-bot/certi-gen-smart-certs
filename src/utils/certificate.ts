@@ -15,62 +15,45 @@ export const generateCertificateId = () => {
   return `CERT-${result}`;
 };
 
-// MAR Points system
-export const getMarPointsForActivity = (activity: string): number => {
-  const marPointsMap: Record<string, number> = {
-    "Internship": 10,
-    "Hackathon": 8,
-    "Webinar": 5,
-    "Online Course": 7,
-    "Volunteer Work": 6,
-    "Volunteering": 6,
-    "Innovation": 9,
-    "Workshop": 6,
-    "Project": 10
-  };
-  
-  return marPointsMap[activity] || 5; // Default to 5 points if activity not found
-};
-
 // Get stamp and signature based on activity
 export const getAssetsByActivityType = (activity: string) => {
-  // In a real app, these would be actual URLs or imported assets
+  // Default values
   const defaultStamp = "/placeholder.svg";
   const defaultSignature = "/placeholder.svg";
   
   switch (activity.toLowerCase()) {
     case 'internship':
       return { 
-        stamp: defaultStamp, 
-        signature: defaultSignature,
-        signer: "Industry Mentor"
+        stamp: "/internship_stamp.png", 
+        signature: "/ananya_signature.png",
+        signer: "Internship Coordinator"
       };
     case 'webinar':
     case 'online course':
     case 'workshop':
       return { 
-        stamp: defaultStamp, 
-        signature: defaultSignature,
+        stamp: "/webinar_stamp.png", 
+        signature: "/priya_signature.png",
         signer: "Course Instructor"
       };
     case 'hackathon':
       return { 
-        stamp: defaultStamp, 
-        signature: defaultSignature,
+        stamp: "/hackathon_stamp.png", 
+        signature: "/ramesh_signature.png",
         signer: "Event Organizer"
       };
     case 'volunteering':
     case 'volunteer work':
       return { 
-        stamp: defaultStamp, 
-        signature: defaultSignature,
+        stamp: "/volunteer_stamp.png", 
+        signature: "/volunteer_signature.png",
         signer: "Volunteer Coordinator"
       };
     case 'project':
     case 'innovation':
       return { 
-        stamp: defaultStamp, 
-        signature: defaultSignature,
+        stamp: "/project_stamp.png", 
+        signature: "/project_signature.png",
         signer: "Project Mentor"
       };
     default:
@@ -145,15 +128,14 @@ export const generatePdf = (certificateData: CertificateData, certificateId: str
     doc.text(`participated in the ${activity} on ${format(activityDate, 'd MMMM yyyy')}.`, pageWidth / 2, 92, { align: "center" });
   }
   
-  // MAR Points badge
-  const marPoints = getMarPointsForActivity(activity);
+  // Activity badge
   doc.setFillColor(240, 249, 255);
   doc.setDrawColor(147, 197, 253);
   doc.roundedRect(pageWidth / 2 - 30, 110, 60, 15, 5, 5, 'FD');
   doc.setFont("helvetica", "bold");
   doc.setTextColor(26, 86, 219);
   doc.setFontSize(11);
-  doc.text(`${activity}: ${marPoints} MAR Points`, pageWidth / 2, 119, { align: "center" });
+  doc.text(activity, pageWidth / 2, 119, { align: "center" });
   
   // Get custom assets based on activity type
   const { signer } = getAssetsByActivityType(activity);
@@ -166,7 +148,7 @@ export const generatePdf = (certificateData: CertificateData, certificateId: str
   doc.line(60, 160, 120, 160);
   doc.setFont("helvetica", "italic");
   doc.setFontSize(12);
-  doc.text("John Doe", 90, 158, { align: "center" });
+  doc.text("Prof. John Smith", 90, 158, { align: "center" });
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.text("Director", 90, 165, { align: "center" });
@@ -175,7 +157,7 @@ export const generatePdf = (certificateData: CertificateData, certificateId: str
   doc.line(pageWidth - 120, 160, pageWidth - 60, 160);
   doc.setFont("helvetica", "italic");
   doc.setFontSize(12);
-  doc.text("Jane Smith", pageWidth - 90, 158, { align: "center" });
+  doc.text("Dr. Sarah Johnson", pageWidth - 90, 158, { align: "center" });
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.text(signer, pageWidth - 90, 165, { align: "center" });
@@ -196,8 +178,8 @@ export const generatePdf = (certificateData: CertificateData, certificateId: str
   // Footer
   doc.setFontSize(8);
   doc.setTextColor(150, 150, 150);
-  doc.text("Powered by CertiGen - Instant Certificate Generator", pageWidth / 2, pageHeight - 15, { align: "center" });
-  doc.text("Verify this certificate at: certiverify.makaut.edu", pageWidth / 2, pageHeight - 10, { align: "center" });
+  doc.text("Powered by CertiGen - Professional Certificate Generator", pageWidth / 2, pageHeight - 15, { align: "center" });
+  doc.text("Verify this certificate at: certiverify.example.com", pageWidth / 2, pageHeight - 10, { align: "center" });
   
   return doc;
 };

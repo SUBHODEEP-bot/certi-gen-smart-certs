@@ -2,8 +2,7 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { cn } from "@/lib/utils";
-import { getMarPointsForActivity } from '@/utils/certificate';
-import { BadgeCheck, Award } from 'lucide-react';
+import { BadgeCheck } from 'lucide-react';
 
 interface CertificateData {
   fullName?: string;
@@ -23,8 +22,6 @@ export default function CertificatePreview({
   certificateId = "PREVIEW",
   className 
 }: CertificatePreviewProps) {
-  const randomDirectorSignature = "John Doe";
-  const randomCoordinatorSignature = "Jane Smith";
   const currentDate = new Date();
   
   const name = certificateData?.fullName || "Your Name";
@@ -32,36 +29,66 @@ export default function CertificatePreview({
   const date = certificateData?.activityDate 
     ? format(certificateData.activityDate, "d MMMM yyyy") 
     : "Date of Activity";
-  const marPoints = certificateData?.activity ? getMarPointsForActivity(certificateData.activity) : 0;
   const certificateText = certificateData?.certificateText || "Certificate description will appear here after generation.";
 
   // Choose stamp and signature based on activity type
   const getStampAndSignature = (activityType?: string) => {
-    // In a real app, these would be actual image paths
+    // Default values
     const defaultStamp = "/placeholder.svg";
     const defaultSignature = "/placeholder.svg";
+    const defaultSigner = "Director";
     
-    if (!activityType) return { stamp: defaultStamp, signature: defaultSignature };
+    if (!activityType) return { 
+      stamp: defaultStamp, 
+      signature: defaultSignature,
+      signer: defaultSigner 
+    };
     
     switch (activityType.toLowerCase()) {
       case 'internship':
-        return { stamp: "/placeholder.svg", signature: "/placeholder.svg" };
+        return { 
+          stamp: "/internship_stamp.png", 
+          signature: "/ananya_signature.png",
+          signer: "Internship Coordinator" 
+        };
       case 'webinar':
-        return { stamp: "/placeholder.svg", signature: "/placeholder.svg" };
+        return { 
+          stamp: "/webinar_stamp.png", 
+          signature: "/priya_signature.png",
+          signer: "Webinar Host" 
+        };
       case 'hackathon':
-        return { stamp: "/placeholder.svg", signature: "/placeholder.svg" };
+        return { 
+          stamp: "/hackathon_stamp.png", 
+          signature: "/ramesh_signature.png",
+          signer: "Event Organizer" 
+        };
       case 'volunteering':
       case 'volunteer work':
-        return { stamp: "/placeholder.svg", signature: "/placeholder.svg" };
+        return { 
+          stamp: "/volunteer_stamp.png", 
+          signature: "/volunteer_signature.png",
+          signer: "Volunteer Coordinator" 
+        };
       case 'project':
       case 'innovation':
-        return { stamp: "/placeholder.svg", signature: "/placeholder.svg" };
+        return { 
+          stamp: "/project_stamp.png", 
+          signature: "/project_signature.png",
+          signer: "Project Mentor" 
+        };
       default:
-        return { stamp: defaultStamp, signature: defaultSignature };
+        return { 
+          stamp: defaultStamp, 
+          signature: defaultSignature,
+          signer: defaultSigner 
+        };
     }
   };
 
-  const { stamp, signature } = getStampAndSignature(activity);
+  const { stamp, signature, signer } = getStampAndSignature(activity);
+  const randomDirectorName = "Prof. John Smith";
+  const randomCoordinatorName = "Dr. Sarah Johnson";
 
   return (
     <div className={cn(
@@ -69,7 +96,7 @@ export default function CertificatePreview({
       "print:border-4 certificate-print-area",
       className
     )}>
-      {/* QR Code - Will be placeholder for now */}
+      {/* QR Code placeholder */}
       <div className="absolute top-4 right-4 bg-white p-1 rounded-md shadow-sm">
         <div className="w-16 h-16 bg-gray-200 flex items-center justify-center text-xs text-gray-500">
           QR Code
@@ -93,10 +120,6 @@ export default function CertificatePreview({
           <h1 className="text-2xl md:text-3xl font-bold mb-1 text-certigen-navy">CERTIFICATE</h1>
           <h2 className="text-xl md:text-2xl font-semibold mb-1 text-certigen-navy">OF ACHIEVEMENT</h2>
           <div className="w-24 h-1 bg-certigen-gold mb-4"></div>
-          {/* Added seal icon */}
-          <div className="text-certigen-gold mb-2">
-            <Award className="h-10 w-10" />
-          </div>
         </div>
         
         <p className="text-sm mb-2 text-certigen-gray">This is to certify that</p>
@@ -112,9 +135,6 @@ export default function CertificatePreview({
         {activity && (
           <div className="my-3 border border-certigen-lightblue bg-blue-50 px-4 py-2 rounded-full flex items-center justify-center">
             <span className="font-medium text-certigen-blue">{activity}</span>
-            <div className="mx-2 h-4 w-px bg-certigen-lightblue"></div>
-            <span className="text-certigen-gold font-bold">{marPoints} MAR Points</span>
-            <BadgeCheck className="ml-1 h-5 w-5 text-certigen-gold" />
           </div>
         )}
         
@@ -125,28 +145,28 @@ export default function CertificatePreview({
         <div className="flex w-full justify-around mb-6 mt-6">
           <div className="flex flex-col items-center">
             <div className="mb-2">
-              {/* Placeholder for Director Stamp */}
-              <div className="w-16 h-16 mx-auto opacity-30">
+              {/* Director Stamp */}
+              <div className="w-16 h-16 mx-auto opacity-70">
                 <img src={stamp} alt="Official Stamp" className="w-full h-full object-contain" />
               </div>
             </div>
             <div className="w-36 border-b border-gray-400 pb-1 mb-1">
-              <p className="font-certificate italic">{randomDirectorSignature}</p>
+              <p className="font-certificate italic">{randomDirectorName}</p>
             </div>
             <p className="text-sm text-gray-600">Director</p>
           </div>
           
           <div className="flex flex-col items-center">
             <div className="mb-2">
-              {/* Placeholder for Signature Image */}
-              <div className="w-16 h-16 mx-auto opacity-30">
+              {/* Program Coordinator Signature */}
+              <div className="w-16 h-16 mx-auto opacity-70">
                 <img src={signature} alt="Signature" className="w-full h-full object-contain" />
               </div>
             </div>
             <div className="w-36 border-b border-gray-400 pb-1 mb-1">
-              <p className="font-certificate italic">{randomCoordinatorSignature}</p>
+              <p className="font-certificate italic">{randomCoordinatorName}</p>
             </div>
-            <p className="text-sm text-gray-600">Program Coordinator</p>
+            <p className="text-sm text-gray-600">{signer}</p>
           </div>
         </div>
         
@@ -157,7 +177,7 @@ export default function CertificatePreview({
         </div>
         
         <div className="text-xs text-gray-500 italic mt-2 opacity-60">
-          Powered by CertiGen - Instant Certificate Generator
+          Powered by CertiGen - Professional Certificate Generator
         </div>
       </div>
     </div>

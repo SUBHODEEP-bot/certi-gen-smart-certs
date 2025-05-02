@@ -5,9 +5,9 @@ import Footer from '@/components/Footer';
 import CertificateForm from '@/components/CertificateForm';
 import CertificatePreview from '@/components/CertificatePreview';
 import { Button } from '@/components/ui/button';
-import { generateCertificateId, generatePdf, CertificateData, getMarPointsForActivity } from '@/utils/certificate';
+import { generateCertificateId, generatePdf, CertificateData } from '@/utils/certificate';
 import { useToast } from '@/hooks/use-toast';
-import { Download, Mail, Share, Printer, Check, Award } from 'lucide-react';
+import { Download, Mail, Share, Printer, Check } from 'lucide-react';
 
 const Generator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -122,15 +122,6 @@ const Generator = () => {
                   <div>
                     <h3 className="font-semibold text-lg">Certificate Generated Successfully!</h3>
                     <p>Your certificate has been created and is ready to download.</p>
-                    
-                    {/* MAR Points banner */}
-                    <div className="mt-3 flex items-center">
-                      <Award className="h-5 w-5 text-certigen-gold mr-2" />
-                      <span className="text-certigen-blue font-medium">
-                        You earned {generatedCertificate.activity ? 
-                        getMarPointsForActivity(generatedCertificate.activity) : 0} MAR Points!
-                      </span>
-                    </div>
                   </div>
                 </div>
               </div>
