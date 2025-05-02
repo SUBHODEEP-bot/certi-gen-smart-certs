@@ -29,12 +29,20 @@ export default function CertificatePreview({
   const date = certificateData?.activityDate 
     ? format(certificateData.activityDate, "d MMMM yyyy") 
     : "Date of Activity";
-  const certificateText = certificateData?.certificateText || "Certificate description will appear here after generation.";
+    
+  // Clean certificate text from unwanted phrases
+  const certificateText = certificateData?.certificateText 
+    ? certificateData.certificateText
+        .replace(/\b\d+\s*MAR\s*Points\b/gi, '')
+        .replace(/This achievement is worth.*?points\./gi, '')
+        .replace(/meeting all the necessary requirements as per academic standards recognized by MAKAUT\./gi, '')
+        .trim()
+    : "Certificate description will appear here after generation.";
 
   // Choose stamp and signature based on activity type
   const getStampAndSignature = (activityType?: string) => {
     // Using consistent CertiGen stamp for all certificates
-    const certiGenStamp = "/certigen_stamp.png";
+    const certiGenStamp = "/lovable-uploads/7154962c-3d8c-4d09-920e-e84a1600b65a.png";
     
     if (!activityType) return { 
       stamp: certiGenStamp, 
@@ -127,8 +135,7 @@ export default function CertificatePreview({
         </h2>
         
         <div className="mb-4 px-8 text-sm md:text-base text-certigen-gray max-w-2xl">
-          {/* Ensure no MAR points are mentioned in the text */}
-          {certificateText.replace(/\b\d+\s*MAR\s*Points\b/gi, '').replace(/This achievement is worth.*?points\./gi, '')}
+          {certificateText}
         </div>
         
         {activity && (
@@ -167,30 +174,27 @@ export default function CertificatePreview({
             </div>
             <p className="text-sm text-gray-600">Executive Director</p>
           </div>
+        </div>
 
-          {/* Official CertiGen Stamp - positioned at bottom right */}
-          <div className="absolute bottom-12 right-12 flex flex-col items-center">
-            <div className="w-24 h-24 opacity-80 bg-white bg-opacity-50 rounded-full flex items-center justify-center">
-              {/* If the stamp image exists, use it */}
-              {stamp ? (
-                <img src={stamp} alt="Official Stamp" className="w-20 h-20 object-contain" />
-              ) : (
-                <div className="flex flex-col items-center justify-center">
-                  <Stamp className="h-12 w-12 text-certigen-navy opacity-80" />
-                  <p className="text-xs text-certigen-navy font-bold mt-1">CERTIGEN</p>
-                </div>
-              )}
-            </div>
+        {/* Official CertiGen Stamp - positioned at bottom right */}
+        <div className="absolute bottom-12 right-12 flex flex-col items-center">
+          <div className="w-24 h-24">
+            {stamp ? (
+              <img src={stamp} alt="Official Stamp" className="w-full h-full object-contain" />
+            ) : (
+              <div className="flex flex-col items-center justify-center bg-white bg-opacity-50 rounded-full w-full h-full">
+                <Stamp className="h-12 w-12 text-certigen-navy opacity-80" />
+                <p className="text-xs text-certigen-navy font-bold mt-1">CERTIGEN</p>
+              </div>
+            )}
           </div>
         </div>
         
         {/* Bottom Section with QR Code and Certificate Details - improved positioning */}
         <div className="absolute bottom-6 left-6 flex items-start">
           {/* QR Code */}
-          <div className="bg-white p-1 rounded-md shadow-sm mr-4">
-            <div className="w-16 h-16 flex items-center justify-center">
-              <QrCode className="h-12 w-12 text-certigen-navy opacity-80" />
-            </div>
+          <div className="bg-white p-2 rounded-md shadow-sm mr-4">
+            <QrCode className="h-10 w-10 text-certigen-navy opacity-80" />
           </div>
           
           {/* Certificate Details */}
@@ -203,7 +207,7 @@ export default function CertificatePreview({
           </div>
         </div>
         
-        <div className="text-xs text-gray-500 italic mt-2 opacity-60 absolute bottom-3 right-1/2 transform translate-x-1/2">
+        <div className="text-xs text-gray-500 italic absolute bottom-3 w-full text-center">
           Powered by CertiGen - Professional Certificate Generator
         </div>
       </div>

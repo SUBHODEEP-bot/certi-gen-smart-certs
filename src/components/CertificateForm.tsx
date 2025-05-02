@@ -109,8 +109,8 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
       
       const formattedDate = format(values.activityDate, "MMMM d, yyyy");
       
-      // Generate a professional-sounding certificate text
-      const generatedText = `This is to certify that ${values.fullName} has successfully participated in the ${values.activity} conducted on ${formattedDate}. The candidate has demonstrated exceptional skills and knowledge throughout this program, meeting all the necessary requirements as per academic standards recognized by MAKAUT. This achievement is worth ${getMarPointsForActivity(values.activity)} MAR Points.`;
+      // Generate a professional-sounding certificate text without MAR points
+      const generatedText = `This is to certify that ${values.fullName} has successfully participated in the ${values.activity} conducted on ${formattedDate}. The candidate has demonstrated exceptional skills and knowledge throughout this program.`;
       
       // Update the form with the generated text
       form.setValue("certificateText", generatedText);
@@ -179,7 +179,7 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
                       <SelectContent>
                         {activityOptions.map((activity) => (
                           <SelectItem key={activity} value={activity}>
-                            {activity} ({getMarPointsForActivity(activity)} MAR points)
+                            {activity}
                           </SelectItem>
                         ))}
                       </SelectContent>

@@ -1,3 +1,4 @@
+
 import { jsPDF } from 'jspdf';
 import { format } from 'date-fns';
 
@@ -17,7 +18,7 @@ export const generateCertificateId = () => {
 // Get stamp and signature based on activity
 export const getAssetsByActivityType = (activity: string) => {
   // Common stamp for all certificates
-  const certiGenStamp = "/certigen_stamp.png"; // This would be a consistent stamp with the CertiGen logo
+  const certiGenStamp = "/lovable-uploads/7154962c-3d8c-4d09-920e-e84a1600b65a.png"; // Using the uploaded CertiGen stamp
   
   switch (activity.toLowerCase()) {
     case 'internship':
@@ -70,7 +71,6 @@ export const getAssetsByActivityType = (activity: string) => {
 };
 
 // This function will return the MAR points for the activity
-// We're keeping this function for compatibility even though we're removing MAR points references
 export const getMarPointsForActivity = (activity: string): number => {
   switch (activity.toLowerCase()) {
     case 'internship':
@@ -144,9 +144,12 @@ export const generatePdf = (certificateData: CertificateData, certificateId: str
   doc.setTextColor(60, 60, 60);
   
   if (certificateText) {
-    // Ensure we don't include MAR points in the text
-    let cleanedText = certificateText.replace(/\b\d+\s*MAR\s*Points\b/gi, '');
-    cleanedText = cleanedText.replace(/This achievement is worth.*?points\./gi, '');
+    // Ensure we don't include unwanted text phrases
+    let cleanedText = certificateText
+      .replace(/\b\d+\s*MAR\s*Points\b/gi, '')
+      .replace(/This achievement is worth.*?points\./gi, '')
+      .replace(/meeting all the necessary requirements as per academic standards recognized by MAKAUT\./gi, '')
+      .trim();
     
     const splitText = doc.splitTextToSize(cleanedText, maxWidth);
     doc.text(splitText, pageWidth / 2, 85, { align: "center" });
@@ -166,7 +169,7 @@ export const generatePdf = (certificateData: CertificateData, certificateId: str
   doc.text(activity, pageWidth / 2, 119, { align: "center" });
   
   // Get custom assets based on activity type
-  const { signer, title } = getAssetsByActivityType(activity);
+  const { signer, title, stamp } = getAssetsByActivityType(activity);
   
   // Signatures
   doc.setLineWidth(0.5);
@@ -196,21 +199,15 @@ export const generatePdf = (certificateData: CertificateData, certificateId: str
   doc.text(`Certificate ID: ${certificateId}`, margin + 5, pageHeight - 15);
   doc.text(`Issue Date: ${format(new Date(), 'd MMMM yyyy')}`, margin + 5, pageHeight - 10);
   
-  // QR Code - positioned at bottom right corner
+  // QR Code - positioned at bottom left near the certificate ID and date
   doc.setFillColor(240, 240, 240);
-  doc.roundedRect(pageWidth - margin - 25, pageHeight - margin - 25, 20, 20, 2, 2, 'F');
+  doc.roundedRect(margin + 5, pageHeight - margin - 30, 20, 20, 2, 2, 'F');
   doc.setFontSize(6);
   doc.setTextColor(150, 150, 150);
-  doc.text("QR Code", pageWidth - margin - 15, pageHeight - margin - 15, { align: "center" });
+  doc.text("QR Code", margin + 15, pageHeight - margin - 20, { align: "center" });
   
   // Add CertiGen stamp in a prominent position
-  doc.setFillColor(230, 230, 230, 0.5);
-  doc.setDrawColor(200, 200, 200);
-  doc.roundedRect(pageWidth - margin - 40, pageHeight - margin - 40, 35, 35, 3, 3, 'FD');
-  doc.setFontSize(8);
-  doc.setTextColor(150, 150, 150);
-  doc.text("CertiGen Official", pageWidth - margin - 22.5, pageHeight - margin - 25, { align: "center" });
-  doc.text("Stamp", pageWidth - margin - 22.5, pageHeight - margin - 20, { align: "center" });
+  doc.addImage(stamp, 'PNG', pageWidth - margin - 40, pageHeight - margin - 40, 35, 35);
   
   // Footer
   doc.setFontSize(8);
