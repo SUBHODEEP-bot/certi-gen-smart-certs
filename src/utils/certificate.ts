@@ -1,4 +1,3 @@
-
 import { jsPDF } from 'jspdf';
 import { format } from 'date-fns';
 
@@ -62,6 +61,29 @@ export const getAssetsByActivityType = (activity: string) => {
         signature: defaultSignature,
         signer: "Program Coordinator"
       };
+  }
+};
+
+// This function will return the MAR points for the activity
+// We're keeping this function for compatibility even though we're removing MAR points references
+export const getMarPointsForActivity = (activity: string): number => {
+  switch (activity.toLowerCase()) {
+    case 'internship':
+      return 10;
+    case 'webinar':
+    case 'online course':
+    case 'workshop':
+      return 5;
+    case 'hackathon':
+      return 8;
+    case 'volunteering':
+    case 'volunteer work':
+      return 6;
+    case 'project':
+    case 'innovation':
+      return 10;
+    default:
+      return 5;
   }
 };
 
