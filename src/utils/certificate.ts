@@ -177,12 +177,12 @@ export const generatePdf = async (certificateData: CertificateData, certificateI
   doc.setLineWidth(1);
   doc.line(pageWidth / 2 - 30, 55, pageWidth / 2 + 30, 55);
   
-  // Certificate ID and Issue Date - now at top right
+  // Certificate ID and Issue Date - now at top right with better positioning
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(100, 100, 100);
-  doc.text(`Certificate ID: ${certificateId}`, pageWidth - margin - 50, margin + 10);
-  doc.text(`Issue Date: ${format(new Date(), 'd MMMM yyyy')}`, pageWidth - margin - 50, margin + 15);
+  doc.text(`Certificate ID: ${certificateId}`, pageWidth - margin - 45, margin + 10);
+  doc.text(`Issue Date: ${format(new Date(), 'd MMMM yyyy')}`, pageWidth - margin - 45, margin + 15);
   
   // Recipient name
   doc.setFont("helvetica", "bold");
@@ -252,12 +252,9 @@ export const generatePdf = async (certificateData: CertificateData, certificateI
   doc.setFontSize(10);
   doc.text(title, pageWidth - 90, 165, { align: "center" });
   
-  // QR Code - positioned at bottom left
+  // QR Code - positioned at bottom left with improved position
   if (qrCodeDataUrl) {
-    doc.addImage(qrCodeDataUrl, 'PNG', margin + 5, pageHeight - margin - 30, 20, 20);
-    doc.setFontSize(6);
-    doc.setTextColor(150, 150, 150);
-    doc.text("Scan to verify", margin + 15, pageHeight - margin - 32, { align: "center" });
+    doc.addImage(qrCodeDataUrl, 'PNG', margin + 5, pageHeight - margin - 25, 20, 20);
   }
   
   // Add "Online Verified Certificate" text at bottom right

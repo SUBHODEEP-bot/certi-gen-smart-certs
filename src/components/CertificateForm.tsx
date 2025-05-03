@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { z } from "zod";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2, Languages, FileCheck } from "lucide-react";
@@ -86,6 +86,7 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
   const [isGeneratingText, setIsGeneratingText] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [submittedValues, setSubmittedValues] = useState<CertificateFormValues | null>(null);
+  const [shouldTriggerGeneration, setShouldTriggerGeneration] = useState(false);
   
   const form = useForm<CertificateFormValues>({
     resolver: zodResolver(formSchema),
@@ -98,6 +99,25 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
       template: "classic",
     },
   });
+
+  // Watch for activity and activityDate changes to trigger automatic text generation
+  const activity = form.watch("activity");
+  const activityDate = form.watch("activityDate");
+  const fullName = form.watch("fullName");
+  const collegeName = form.watch("collegeName");
+  const language = form.watch("language");
+
+  useEffect(() => {
+    // Only trigger generation if both activity and date are provided
+    if (activity && activityDate && fullName && collegeName && !isGeneratingText) {
+      // Set a small delay to avoid too many simultaneous generations when filling form
+      const timer = setTimeout(() => {
+        generateCertificateText();
+      }, 800);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [activity, activityDate, fullName, collegeName, language]);
 
   function handlePreview(values: CertificateFormValues) {
     setPreviewData(values);
@@ -112,11 +132,7 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
     
     // Check if required fields are provided
     if (!values.fullName || !values.activity || !values.activityDate || !values.collegeName) {
-      toast({
-        title: "Fill all fields",
-        description: "Please fill all required fields to generate certificate text.",
-        variant: "destructive"
-      });
+      // Don't show error toast during automatic generation
       return;
     }
     
@@ -151,10 +167,14 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
         certificateText: generatedText
       });
       
-      toast({
-        title: "Text Generated",
-        description: "Certificate text has been generated successfully.",
-      });
+      // Only show toast for manual generation
+      if (shouldTriggerGeneration) {
+        toast({
+          title: "Text Generated",
+          description: "Certificate text has been generated successfully.",
+        });
+        setShouldTriggerGeneration(false);
+      }
     } catch (error) {
       toast({
         title: "Text Generation Failed",
@@ -343,24 +363,30 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
                 />
               </div>
 
-              <div className="pt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full bg-certigen-cream hover:bg-certigen-cream/80 border-certigen-gold text-certigen-navy"
-                  onClick={generateCertificateText}
-                  disabled={isGeneratingText}
-                >
-                  {isGeneratingText ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generating Text...
-                    </>
-                  ) : (
-                    "Generate Certificate Text with AI"
-                  )}
-                </Button>
-              </div>
+              {/* Hide the AI generation button from normal users */}
+              {false && (
+                <div className="pt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full bg-certigen-cream hover:bg-certigen-cream/80 border-certigen-gold text-certigen-navy"
+                    onClick={() => {
+                      setShouldTriggerGeneration(true);
+                      generateCertificateText();
+                    }}
+                    disabled={isGeneratingText}
+                  >
+                    {isGeneratingText ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Generating Text...
+                      </>
+                    ) : (
+                      "Generate Certificate Text with AI"
+                    )}
+                  </Button>
+                </div>
+              )}
 
               <FormField
                 control={form.control}
@@ -372,7 +398,7 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
                       <textarea 
                         {...field} 
                         rows={4}
-                        placeholder="Generate text or write your own certificate description..."
+                        placeholder="Certificate text will be automatically generated..."
                         className="w-full border rounded-md p-2 border-certigen-lightblue focus-visible:ring-certigen-blue text-sm focus:outline-none focus:ring-2" 
                       />
                     </FormControl>

@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { format } from 'date-fns';
 import { cn } from "@/lib/utils";
 import { QrCode } from 'lucide-react';
 import { getCertificateTitle } from '@/utils/certificate';
+
 interface CertificateData {
   fullName?: string;
   activity?: string;
@@ -12,11 +14,13 @@ interface CertificateData {
   language?: 'english' | 'bengali' | 'hindi';
   template?: 'classic' | 'modern' | 'elegant' | 'professional';
 }
+
 interface CertificatePreviewProps {
   certificateData: CertificateData | null;
   certificateId?: string;
   className?: string;
 }
+
 export default function CertificatePreview({
   certificateData,
   certificateId = "PREVIEW",
@@ -108,8 +112,8 @@ export default function CertificatePreview({
   };
   return <div className={cn("certificate-container relative border-8 rounded-lg p-8 shadow-lg", getTemplateStyles(), "print:border-4 certificate-print-area", className)}>
       <div className="flex flex-col items-center text-center">
-        {/* Certificate ID and Issue Date - Moved to top-right */}
-        <div className="absolute top-6 right-6 text-right">
+        {/* Certificate ID and Issue Date - Top-right corner */}
+        <div className="absolute top-6 right-8 text-right">
           <div className="text-certigen-blue">
             <p className="text-sm">Certificate ID:</p>
             <p className="font-bold">{certificateId}</p>
@@ -174,18 +178,15 @@ export default function CertificatePreview({
           </div>
         </div>
         
-        {/* Bottom Section with QR Code and Certificate Details */}
-        <div className="absolute bottom-6 left-6 flex items-start">
+        {/* Bottom Section with QR Code - Fixed positioning */}
+        <div className="absolute bottom-10 left-6 flex items-start">
           {/* QR Code */}
           <div className="bg-white p-2 rounded-md shadow-sm mr-4 px-[2px] py-[5px] mx-0 my-0">
             <QrCode className="h-10 w-10 text-certigen-navy opacity-80" />
           </div>
-          
-          {/* Certificate Details */}
-          
         </div>
         
-        {/* New Online Verified Certificate text at bottom-right */}
+        {/* Online Verified Certificate text at bottom-right */}
         <div className="absolute bottom-6 right-6 text-xs text-certigen-blue font-semibold">
           Online Verified Certificate
         </div>
