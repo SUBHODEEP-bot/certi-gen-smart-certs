@@ -1,6 +1,11 @@
 
 import { jsPDF } from 'jspdf';
 import { format } from 'date-fns';
+import QRCode from 'qrcode';
+import { Settings } from '@/types/settings';
+
+// Supported languages
+export type SupportedLanguage = 'english' | 'bengali' | 'hindi';
 
 // Generate a random certificate ID
 export const generateCertificateId = () => {
@@ -92,15 +97,65 @@ export const getMarPointsForActivity = (activity: string): number => {
   }
 };
 
+// Certificate template types
+export type CertificateTemplate = 'classic' | 'modern' | 'elegant' | 'professional';
+
 export interface CertificateData {
   fullName: string;
   activity: string;
   activityDate: Date;
   certificateText?: string;
+  collegeName?: string;
+  language?: SupportedLanguage;
+  template?: CertificateTemplate;
 }
 
-export const generatePdf = (certificateData: CertificateData, certificateId: string) => {
-  const { fullName, activity, activityDate, certificateText } = certificateData;
+// Get certificate title translations
+export const getCertificateTitle = (language: SupportedLanguage = 'english') => {
+  switch (language) {
+    case 'bengali':
+      return {
+        certificate: "সার্টিফিকেট",
+        ofAchievement: "অর্জনের"
+      };
+    case 'hindi':
+      return {
+        certificate: "प्रमाणपत्र",
+        ofAchievement: "उपलब्धि का"
+      };
+    default: // English
+      return {
+        certificate: "CERTIFICATE",
+        ofAchievement: "OF ACHIEVEMENT"
+      };
+  }
+};
+
+// Generate QR Code for certificate verification
+export const generateQRCode = async (certificateId: string): Promise<string> => {
+  try {
+    const verifyUrl = `${window.location.origin}/verify?id=${certificateId}`;
+    return await QRCode.toDataURL(verifyUrl);
+  } catch (error) {
+    console.error("Error generating QR code:", error);
+    return ""; // Return empty string if QR generation fails
+  }
+};
+
+export const generatePdf = async (certificateData: CertificateData, certificateId: string) => {
+  const { 
+    fullName, 
+    activity, 
+    activityDate, 
+    certificateText, 
+    collegeName = "Not Specified",
+    language = 'english',
+    template = 'classic' 
+  } = certificateData;
+  
+  // Generate QR code for verification
+  const qrCodeDataUrl = await generateQRCode(certificateId);
+  
   const doc = new jsPDF({
     orientation: 'landscape',
     unit: 'mm',
@@ -111,20 +166,21 @@ export const generatePdf = (certificateData: CertificateData, certificateId: str
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 10;
+
+  // Apply template styles
+  applyTemplateStyle(doc, template, pageWidth, pageHeight, margin);
   
-  // Add border
-  doc.setDrawColor(245, 158, 11); // Gold color
-  doc.setLineWidth(3);
-  doc.rect(margin, margin, pageWidth - 2 * margin, pageHeight - 2 * margin);
+  // Get translated titles
+  const titles = getCertificateTitle(language);
   
   // Certificate heading
   doc.setFont("helvetica", "bold");
   doc.setFontSize(30);
   doc.setTextColor(26, 86, 219); // Blue color
-  doc.text("CERTIFICATE", pageWidth / 2, 40, { align: "center" });
+  doc.text(titles.certificate, pageWidth / 2, 40, { align: "center" });
   
   doc.setFontSize(24);
-  doc.text("OF ACHIEVEMENT", pageWidth / 2, 50, { align: "center" });
+  doc.text(titles.ofAchievement, pageWidth / 2, 50, { align: "center" });
   
   // Gold line separator
   doc.setDrawColor(245, 158, 11);
@@ -136,6 +192,12 @@ export const generatePdf = (certificateData: CertificateData, certificateId: str
   doc.setFontSize(24);
   doc.setTextColor(26, 86, 219);
   doc.text(fullName, pageWidth / 2, 70, { align: "center" });
+  
+  // College name
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(14);
+  doc.setTextColor(80, 80, 80);
+  doc.text(collegeName, pageWidth / 2, 80, { align: "center" });
   
   // Certificate text (AI-generated text)
   const maxWidth = pageWidth - (margin * 6);
@@ -152,11 +214,11 @@ export const generatePdf = (certificateData: CertificateData, certificateId: str
       .trim();
     
     const splitText = doc.splitTextToSize(cleanedText, maxWidth);
-    doc.text(splitText, pageWidth / 2, 85, { align: "center" });
+    doc.text(splitText, pageWidth / 2, 90, { align: "center" });
   } else {
     // Fallback certificate text if no AI-generated text
-    doc.text("This is to certify that the above named individual has successfully", pageWidth / 2, 85, { align: "center" });
-    doc.text(`participated in the ${activity} on ${format(activityDate, 'd MMMM yyyy')}.`, pageWidth / 2, 92, { align: "center" });
+    doc.text("This is to certify that the above named individual has successfully", pageWidth / 2, 90, { align: "center" });
+    doc.text(`participated in the ${activity} on ${format(activityDate, 'd MMMM yyyy')}.`, pageWidth / 2, 97, { align: "center" });
   }
   
   // Activity badge
@@ -200,11 +262,12 @@ export const generatePdf = (certificateData: CertificateData, certificateId: str
   doc.text(`Issue Date: ${format(new Date(), 'd MMMM yyyy')}`, margin + 5, pageHeight - 10);
   
   // QR Code - positioned at bottom left near the certificate ID and date
-  doc.setFillColor(240, 240, 240);
-  doc.roundedRect(margin + 5, pageHeight - margin - 30, 20, 20, 2, 2, 'F');
-  doc.setFontSize(6);
-  doc.setTextColor(150, 150, 150);
-  doc.text("QR Code", margin + 15, pageHeight - margin - 20, { align: "center" });
+  if (qrCodeDataUrl) {
+    doc.addImage(qrCodeDataUrl, 'PNG', margin + 5, pageHeight - margin - 30, 20, 20);
+    doc.setFontSize(6);
+    doc.setTextColor(150, 150, 150);
+    doc.text("Scan to verify", margin + 15, pageHeight - margin - 32, { align: "center" });
+  }
   
   // Add CertiGen stamp in a prominent position
   doc.addImage(stamp, 'PNG', pageWidth - margin - 40, pageHeight - margin - 40, 35, 35);
@@ -215,4 +278,151 @@ export const generatePdf = (certificateData: CertificateData, certificateId: str
   doc.text("Powered by CertiGen - Professional Certificate Generator", pageWidth / 2, pageHeight - 5, { align: "center" });
   
   return doc;
+};
+
+// Apply template styles to the certificate
+const applyTemplateStyle = (doc: jsPDF, template: CertificateTemplate, pageWidth: number, pageHeight: number, margin: number) => {
+  switch (template) {
+    case 'modern':
+      // Modern template with blue gradient border
+      const gradient = doc.createLinearGradient(margin, margin, pageWidth - margin, pageHeight - margin);
+      gradient.addColorStop(0, '#4361ee');
+      gradient.addColorStop(1, '#3a0ca3');
+      doc.setFillColor(gradient);
+      doc.roundedRect(margin, margin, pageWidth - (2 * margin), pageHeight - (2 * margin), 5, 5, 'S');
+      break;
+      
+    case 'elegant':
+      // Elegant template with decorative corners
+      doc.setDrawColor(180, 140, 60); // Gold color
+      doc.setLineWidth(2);
+      doc.rect(margin, margin, pageWidth - (2 * margin), pageHeight - (2 * margin));
+      
+      // Corner decorations
+      const cornerSize = 15;
+      // Top left
+      doc.line(margin, margin + cornerSize, margin + cornerSize, margin);
+      // Top right
+      doc.line(pageWidth - margin - cornerSize, margin, pageWidth - margin, margin + cornerSize);
+      // Bottom left
+      doc.line(margin, pageHeight - margin - cornerSize, margin + cornerSize, pageHeight - margin);
+      // Bottom right
+      doc.line(pageWidth - margin - cornerSize, pageHeight - margin, pageWidth - margin, pageHeight - margin - cornerSize);
+      break;
+      
+    case 'professional':
+      // Professional template with double border
+      doc.setDrawColor(30, 50, 100); // Navy color
+      doc.setLineWidth(3);
+      doc.rect(margin, margin, pageWidth - (2 * margin), pageHeight - (2 * margin));
+      
+      doc.setDrawColor(60, 100, 200); // Light blue
+      doc.setLineWidth(1);
+      doc.rect(margin + 3, margin + 3, pageWidth - (2 * margin) - 6, pageHeight - (2 * margin) - 6);
+      break;
+      
+    case 'classic':
+    default:
+      // Classic template with gold border (default)
+      doc.setDrawColor(245, 158, 11); // Gold color
+      doc.setLineWidth(3);
+      doc.rect(margin, margin, pageWidth - (2 * margin), pageHeight - (2 * margin));
+      break;
+  }
+};
+
+// Admin dashboard analytics
+export interface AnalyticsData {
+  totalCertificates: number;
+  revenue: number;
+  topActivities: Record<string, number>;
+  dailyStats: Record<string, number>;
+}
+
+// Mock function to save generated certificate data to local storage (for admin analytics)
+export const saveGeneratedCertificateData = (certificateData: CertificateData) => {
+  try {
+    // Get existing data
+    const existingDataStr = localStorage.getItem('certigenAdminData');
+    const existingData = existingDataStr ? JSON.parse(existingDataStr) : {
+      certificates: [],
+      totalCertificates: 0,
+      revenue: 0,
+      topActivities: {},
+      dailyStats: {}
+    };
+    
+    // Update data
+    const today = format(new Date(), 'yyyy-MM-dd');
+    
+    // Update certificates array
+    existingData.certificates.push({
+      ...certificateData,
+      generatedAt: new Date().toISOString(),
+      price: 2
+    });
+    
+    // Update counts
+    existingData.totalCertificates += 1;
+    existingData.revenue += 2; // ₹2 per certificate
+    
+    // Update activity counts
+    const activity = certificateData.activity.toLowerCase();
+    existingData.topActivities[activity] = (existingData.topActivities[activity] || 0) + 1;
+    
+    // Update daily stats
+    existingData.dailyStats[today] = (existingData.dailyStats[today] || 0) + 1;
+    
+    // Save back to storage
+    localStorage.setItem('certigenAdminData', JSON.stringify(existingData));
+    
+    return true;
+  } catch (error) {
+    console.error("Error saving certificate data:", error);
+    return false;
+  }
+};
+
+// Get admin analytics data
+export const getAnalyticsData = (): AnalyticsData => {
+  try {
+    const dataStr = localStorage.getItem('certigenAdminData');
+    if (!dataStr) {
+      return {
+        totalCertificates: 0,
+        revenue: 0,
+        topActivities: {},
+        dailyStats: {}
+      };
+    }
+    
+    const data = JSON.parse(dataStr);
+    return {
+      totalCertificates: data.totalCertificates || 0,
+      revenue: data.revenue || 0,
+      topActivities: data.topActivities || {},
+      dailyStats: data.dailyStats || {}
+    };
+  } catch (error) {
+    console.error("Error retrieving analytics data:", error);
+    return {
+      totalCertificates: 0,
+      revenue: 0,
+      topActivities: {},
+      dailyStats: {}
+    };
+  }
+};
+
+export const getAllGeneratedCertificates = () => {
+  try {
+    const dataStr = localStorage.getItem('certigenAdminData');
+    if (!dataStr) return [];
+    
+    const data = JSON.parse(dataStr);
+    return data.certificates || [];
+  } catch (error) {
+    console.error("Error retrieving certificates:", error);
+    return [];
+  }
 };

@@ -3,12 +3,16 @@ import React from 'react';
 import { format } from 'date-fns';
 import { cn } from "@/lib/utils";
 import { QrCode, Stamp } from 'lucide-react';
+import { getCertificateTitle } from '@/utils/certificate';
 
 interface CertificateData {
   fullName?: string;
   activity?: string;
   activityDate?: Date;
   certificateText?: string;
+  collegeName?: string;
+  language?: 'english' | 'bengali' | 'hindi';
+  template?: 'classic' | 'modern' | 'elegant' | 'professional';
 }
 
 interface CertificatePreviewProps {
@@ -26,9 +30,12 @@ export default function CertificatePreview({
   
   const name = certificateData?.fullName || "Your Name";
   const activity = certificateData?.activity || "Selected Activity";
+  const college = certificateData?.collegeName || "Your College";
   const date = certificateData?.activityDate 
     ? format(certificateData.activityDate, "d MMMM yyyy") 
     : "Date of Activity";
+  const language = certificateData?.language || 'english';
+  const template = certificateData?.template || 'classic';
     
   // Clean certificate text from unwanted phrases
   const certificateText = certificateData?.certificateText 
@@ -38,6 +45,9 @@ export default function CertificatePreview({
         .replace(/meeting all the necessary requirements as per academic standards recognized by MAKAUT\./gi, '')
         .trim()
     : "Certificate description will appear here after generation.";
+
+  // Get translated title
+  const titles = getCertificateTitle(language);
 
   // Choose stamp and signature based on activity type
   const getStampAndSignature = (activityType?: string) => {
@@ -102,10 +112,26 @@ export default function CertificatePreview({
   };
 
   const { stamp, signature, signer, title } = getStampAndSignature(activity);
+  
+  // Get template-specific styles
+  const getTemplateStyles = () => {
+    switch(template) {
+      case 'modern':
+        return "border-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50";
+      case 'elegant':
+        return "border-amber-500 border-[3px] bg-amber-50";
+      case 'professional':
+        return "border-blue-800 border-[3px] bg-white";
+      case 'classic':
+      default:
+        return "border-certigen-gold bg-certigen-cream";
+    }
+  };
 
   return (
     <div className={cn(
-      "certificate-container relative border-8 border-certigen-gold rounded-lg p-8 shadow-lg bg-certigen-cream",
+      "certificate-container relative border-8 rounded-lg p-8 shadow-lg",
+      getTemplateStyles(),
       "print:border-4 certificate-print-area",
       className
     )}>
@@ -123,8 +149,8 @@ export default function CertificatePreview({
         
         {/* Certificate Header with enhanced styling */}
         <div className="flex flex-col items-center mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold mb-1 text-certigen-navy">CERTIFICATE</h1>
-          <h2 className="text-xl md:text-2xl font-semibold mb-1 text-certigen-navy">OF ACHIEVEMENT</h2>
+          <h1 className="text-2xl md:text-3xl font-bold mb-1 text-certigen-navy">{titles.certificate}</h1>
+          <h2 className="text-xl md:text-2xl font-semibold mb-1 text-certigen-navy">{titles.ofAchievement}</h2>
           <div className="w-24 h-1 bg-certigen-gold mb-4"></div>
         </div>
         
@@ -133,6 +159,11 @@ export default function CertificatePreview({
         <h2 className="text-3xl md:text-4xl font-certificate font-bold mb-3 text-certigen-blue">
           {name}
         </h2>
+        
+        {/* College Name */}
+        <p className="text-lg font-medium mb-3 text-gray-600">
+          {college}
+        </p>
         
         <div className="mb-4 px-8 text-sm md:text-base text-certigen-gray max-w-2xl">
           {certificateText}
@@ -200,7 +231,7 @@ export default function CertificatePreview({
           {/* Certificate Details */}
           <div className="text-left">
             <div className="flex items-center text-certigen-blue text-xs mb-1">
-              <span>Digitally verified certificate</span>
+              <span>Scan to verify certificate</span>
             </div>
             <p className="text-xs text-gray-500">Certificate ID: {certificateId}</p>
             <p className="text-xs text-gray-500">Issue Date: {format(currentDate, "d MMMM yyyy")}</p>

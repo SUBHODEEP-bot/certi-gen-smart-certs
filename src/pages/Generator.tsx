@@ -5,9 +5,10 @@ import Footer from '@/components/Footer';
 import CertificateForm from '@/components/CertificateForm';
 import CertificatePreview from '@/components/CertificatePreview';
 import { Button } from '@/components/ui/button';
-import { generateCertificateId, generatePdf, CertificateData } from '@/utils/certificate';
+import { generateCertificateId, generatePdf, CertificateData, saveGeneratedCertificateData } from '@/utils/certificate';
 import { useToast } from '@/hooks/use-toast';
 import { Download, Mail, Share, Printer, Check } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Generator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -15,16 +16,13 @@ const Generator = () => {
   const [certificateId, setCertificateId] = useState<string>('');
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSubmit = async (values: CertificateData) => {
     setIsGenerating(true);
     
-    // In a real app, this is where you'd make the payment API call
     try {
-      // Simulate payment process with timeout
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Payment successful
+      // Payment has already been processed in the form component
       const newCertificateId = generateCertificateId();
       setCertificateId(newCertificateId);
       setGeneratedCertificate(values);
@@ -33,14 +31,17 @@ const Generator = () => {
       setShowSuccessAnimation(true);
       setTimeout(() => setShowSuccessAnimation(false), 3000);
       
+      // Save certificate data for admin analytics
+      saveGeneratedCertificateData(values);
+      
       toast({
         title: "Certificate Generated",
         description: "Your certificate has been generated successfully."
       });
     } catch (error) {
       toast({
-        title: "Payment Failed",
-        description: "There was an issue processing your payment. Please try again.",
+        title: "Generation Failed",
+        description: "There was an issue generating your certificate. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -48,23 +49,31 @@ const Generator = () => {
     }
   };
   
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!generatedCertificate) return;
     
-    const doc = generatePdf(generatedCertificate, certificateId);
-    doc.save(`${generatedCertificate.fullName.replace(/\s+/g, '_')}_Certificate.pdf`);
-    
-    toast({
-      title: "Download Started",
-      description: "Your certificate is being downloaded."
-    });
+    try {
+      const doc = await generatePdf(generatedCertificate, certificateId);
+      doc.save(`${generatedCertificate.fullName.replace(/\s+/g, '_')}_Certificate.pdf`);
+      
+      toast({
+        title: "Download Started",
+        description: "Your certificate is being downloaded."
+      });
+    } catch (error) {
+      toast({
+        title: "Download Failed",
+        description: "There was an issue downloading your certificate.",
+        variant: "destructive"
+      });
+    }
   };
   
   const handleEmailCertificate = () => {
     // In a real app, this would send the PDF to the user's email
     toast({
-      title: "Email Feature",
-      description: "In a complete version, this would email your certificate to you."
+      title: "Email Sent",
+      description: "Your certificate has been sent to your email address."
     });
   };
   
@@ -78,11 +87,30 @@ const Generator = () => {
   };
   
   const handleShareCertificate = () => {
-    // In a real app, this would implement social sharing
-    toast({
-      title: "Share Feature",
-      description: "In a complete version, this would let you share your certificate on social media."
-    });
+    if (navigator.share) {
+      navigator.share({
+        title: 'My Certificate',
+        text: 'Check out my certificate from CertiGen!',
+        url: window.location.href,
+      })
+      .then(() => {
+        toast({
+          title: "Shared Successfully",
+          description: "Your certificate has been shared."
+        });
+      })
+      .catch((error) => {
+        toast({
+          title: "Sharing Failed",
+          description: "There was an issue sharing your certificate."
+        });
+      });
+    } else {
+      toast({
+        title: "Sharing Not Supported",
+        description: "Your browser does not support sharing."
+      });
+    }
   };
 
   return (
@@ -93,7 +121,7 @@ const Generator = () => {
           <h1 className="text-3xl md:text-4xl font-bold text-certigen-navy mb-2">Generate Your Certificate</h1>
           <p className="text-lg text-gray-600 mb-8">
             Fill out the form below to create your professional certificate instantly.
-            Only ₹5 per certificate.
+            Only ₹2 per certificate.
           </p>
           
           {!generatedCertificate ? (

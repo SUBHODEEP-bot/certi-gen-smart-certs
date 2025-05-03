@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { z } from "zod";
 import { format } from "date-fns";
-import { CalendarIcon, Loader2 } from "lucide-react";
+import { CalendarIcon, Loader2, Languages, FileCheck } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -34,7 +34,13 @@ import {
 
 import CertificatePreview from './CertificatePreview';
 import { toast } from '@/hooks/use-toast';
-import { getMarPointsForActivity } from '@/utils/certificate';
+import { 
+  CertificateTemplate, 
+  SupportedLanguage, 
+  getMarPointsForActivity 
+} from '@/utils/certificate';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { PaymentModal } from './PaymentModal';
 
 const formSchema = z.object({
   fullName: z.string().min(2, {
@@ -47,6 +53,15 @@ const formSchema = z.object({
     required_error: "Date of activity is required.",
   }),
   certificateText: z.string().optional(),
+  collegeName: z.string().min(2, {
+    message: "College name must be at least 2 characters."
+  }),
+  language: z.enum(['english', 'bengali', 'hindi'], {
+    required_error: "Please select a language",
+  }),
+  template: z.enum(['classic', 'modern', 'elegant', 'professional'], {
+    required_error: "Please select a template",
+  }),
 });
 
 type CertificateFormValues = z.infer<typeof formSchema>;
@@ -69,6 +84,8 @@ const activityOptions = [
 export default function CertificateForm({ onSubmit, isGenerating }: CertificateFormProps) {
   const [previewData, setPreviewData] = useState<CertificateFormValues | null>(null);
   const [isGeneratingText, setIsGeneratingText] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [submittedValues, setSubmittedValues] = useState<CertificateFormValues | null>(null);
   
   const form = useForm<CertificateFormValues>({
     resolver: zodResolver(formSchema),
@@ -76,6 +93,9 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
       fullName: "",
       activity: "",
       certificateText: "",
+      collegeName: "",
+      language: "english",
+      template: "classic",
     },
   });
 
@@ -91,7 +111,7 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
     const values = form.getValues();
     
     // Check if required fields are provided
-    if (!values.fullName || !values.activity || !values.activityDate) {
+    if (!values.fullName || !values.activity || !values.activityDate || !values.collegeName) {
       toast({
         title: "Fill all fields",
         description: "Please fill all required fields to generate certificate text.",
@@ -109,8 +129,18 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
       
       const formattedDate = format(values.activityDate, "MMMM d, yyyy");
       
-      // Generate a professional-sounding certificate text without MAR points
-      const generatedText = `This is to certify that ${values.fullName} has successfully participated in the ${values.activity} conducted on ${formattedDate}. The candidate has demonstrated exceptional skills and knowledge throughout this program.`;
+      // Generate a professional-sounding certificate text
+      let generatedText = "";
+      switch (values.language) {
+        case 'bengali':
+          generatedText = `এই প্রত্যয়িত করা হচ্ছে যে ${values.fullName} ${values.collegeName} থেকে সফলভাবে ${values.activity} সম্পন্ন করেছেন যা ${formattedDate} তারিখে অনুষ্ঠিত হয়েছিল।`;
+          break;
+        case 'hindi':
+          generatedText = `यह प्रमाणित किया जाता है कि ${values.fullName} ने ${values.collegeName} से ${formattedDate} को आयोजित ${values.activity} में सफलतापूर्वक भाग लिया है।`;
+          break;
+        default: // English
+          generatedText = `This is to certify that ${values.fullName} from ${values.collegeName} has successfully participated in the ${values.activity} conducted on ${formattedDate}. The candidate has demonstrated exceptional skills and knowledge throughout this program.`;
+      }
       
       // Update the form with the generated text
       form.setValue("certificateText", generatedText);
@@ -137,7 +167,15 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
   }
 
   function handleSubmit(values: CertificateFormValues) {
-    onSubmit(values);
+    setSubmittedValues(values);
+    setShowPaymentModal(true);
+  }
+  
+  function handlePaymentSuccess() {
+    if (submittedValues) {
+      onSubmit(submittedValues);
+      setShowPaymentModal(false);
+    }
   }
   
   return (
@@ -145,7 +183,7 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
       <Card className="flex-1 border border-certigen-lightblue shadow-md">
         <CardContent className="pt-6">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
                 name="fullName"
@@ -155,6 +193,24 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
                     <FormControl>
                       <Input 
                         placeholder="Enter your full name" 
+                        {...field} 
+                        className="border-certigen-lightblue focus-visible:ring-certigen-blue" 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="collegeName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>College Name</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Enter your college name" 
                         {...field} 
                         className="border-certigen-lightblue focus-visible:ring-certigen-blue" 
                       />
@@ -231,6 +287,61 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
                   </FormItem>
                 )}
               />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="language"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center">
+                        <Languages className="h-4 w-4 mr-2" />
+                        Certificate Language
+                      </FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="border-certigen-lightblue focus-visible:ring-certigen-blue">
+                            <SelectValue placeholder="Select language" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="english">English</SelectItem>
+                          <SelectItem value="bengali">Bengali</SelectItem>
+                          <SelectItem value="hindi">Hindi</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="template"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center">
+                        <FileCheck className="h-4 w-4 mr-2" />
+                        Certificate Template
+                      </FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="border-certigen-lightblue focus-visible:ring-certigen-blue">
+                            <SelectValue placeholder="Select template" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="classic">Classic</SelectItem>
+                          <SelectItem value="modern">Modern</SelectItem>
+                          <SelectItem value="elegant">Elegant</SelectItem>
+                          <SelectItem value="professional">Professional</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <div className="pt-2">
                 <Button
@@ -278,12 +389,12 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
                   onClick={() => {
                     const values = form.getValues();
                     // Only update preview if we have all required fields
-                    if (values.fullName && values.activity && values.activityDate) {
+                    if (values.fullName && values.activity && values.activityDate && values.collegeName) {
                       handlePreview(values);
                     } else {
                       toast({
-                        title: "Fill all fields",
-                        description: "Please fill all fields to preview your certificate.",
+                        title: "Fill all required fields",
+                        description: "Please fill all required fields to preview your certificate.",
                         variant: "destructive"
                       });
                     }
@@ -296,7 +407,7 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
                   className="flex-1 bg-certigen-blue hover:bg-certigen-navy"
                   disabled={isGenerating || !form.getValues().certificateText}
                 >
-                  {isGenerating ? "Generating..." : "Pay ₹5 & Generate"}
+                  {isGenerating ? "Generating..." : "Pay ₹2 & Generate"}
                 </Button>
               </div>
             </form>
@@ -307,6 +418,14 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
       <div className="flex-1">
         <CertificatePreview certificateData={previewData} />
       </div>
+      
+      {/* Payment Modal */}
+      <PaymentModal 
+        isOpen={showPaymentModal} 
+        onClose={() => setShowPaymentModal(false)}
+        onPaymentSuccess={handlePaymentSuccess}
+        amount={2}
+      />
     </div>
   );
 }
