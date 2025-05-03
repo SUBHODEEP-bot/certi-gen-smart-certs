@@ -1,4 +1,3 @@
-
 import { jsPDF } from 'jspdf';
 import { format } from 'date-fns';
 import QRCode from 'qrcode';
@@ -285,10 +284,9 @@ const applyTemplateStyle = (doc: jsPDF, template: CertificateTemplate, pageWidth
   switch (template) {
     case 'modern':
       // Modern template with blue gradient border
-      const gradient = doc.createLinearGradient(margin, margin, pageWidth - margin, pageHeight - margin);
-      gradient.addColorStop(0, '#4361ee');
-      gradient.addColorStop(1, '#3a0ca3');
-      doc.setFillColor(gradient);
+      // Fix: Remove gradient creation - jsPDF doesn't support createLinearGradient
+      doc.setDrawColor(67, 97, 238); // Blue color
+      doc.setLineWidth(3);
       doc.roundedRect(margin, margin, pageWidth - (2 * margin), pageHeight - (2 * margin), 5, 5, 'S');
       break;
       

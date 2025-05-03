@@ -427,7 +427,16 @@ const AdminBulkGenerator = () => {
             <CardContent>
               <div className="py-8 text-center text-gray-500">
                 <p>Manual entry feature will be available in the next update.</p>
-                <Button className="mt-4" onClick={() => document.querySelector('[data-value="upload"]')?.click()}>
+                <Button 
+                  className="mt-4" 
+                  onClick={() => {
+                    // Fix: Use correct type assertion to access the click method
+                    const element = document.querySelector('[data-value="upload"]');
+                    if (element) {
+                      (element as HTMLElement).click();
+                    }
+                  }}
+                >
                   Switch to CSV Upload
                 </Button>
               </div>
