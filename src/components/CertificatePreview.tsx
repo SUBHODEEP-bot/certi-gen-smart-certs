@@ -1,10 +1,8 @@
-
 import React from 'react';
 import { format } from 'date-fns';
 import { cn } from "@/lib/utils";
 import { QrCode } from 'lucide-react';
 import { getCertificateTitle } from '@/utils/certificate';
-
 interface CertificateData {
   fullName?: string;
   activity?: string;
@@ -14,98 +12,89 @@ interface CertificateData {
   language?: 'english' | 'bengali' | 'hindi';
   template?: 'classic' | 'modern' | 'elegant' | 'professional';
 }
-
 interface CertificatePreviewProps {
   certificateData: CertificateData | null;
   certificateId?: string;
   className?: string;
 }
-
-export default function CertificatePreview({ 
-  certificateData, 
+export default function CertificatePreview({
+  certificateData,
   certificateId = "PREVIEW",
-  className 
+  className
 }: CertificatePreviewProps) {
   const currentDate = new Date();
-  
   const name = certificateData?.fullName || "Your Name";
   const activity = certificateData?.activity || "Selected Activity";
   const college = certificateData?.collegeName || "Your College";
-  const date = certificateData?.activityDate 
-    ? format(certificateData.activityDate, "d MMMM yyyy") 
-    : "Date of Activity";
+  const date = certificateData?.activityDate ? format(certificateData.activityDate, "d MMMM yyyy") : "Date of Activity";
   const language = certificateData?.language || 'english';
   const template = certificateData?.template || 'classic';
-    
+
   // Clean certificate text from unwanted phrases
-  const certificateText = certificateData?.certificateText 
-    ? certificateData.certificateText
-        .replace(/\b\d+\s*MAR\s*Points\b/gi, '')
-        .replace(/This achievement is worth.*?points\./gi, '')
-        .replace(/meeting all the necessary requirements as per academic standards recognized by MAKAUT\./gi, '')
-        .trim()
-    : "Certificate description will appear here after generation.";
+  const certificateText = certificateData?.certificateText ? certificateData.certificateText.replace(/\b\d+\s*MAR\s*Points\b/gi, '').replace(/This achievement is worth.*?points\./gi, '').replace(/meeting all the necessary requirements as per academic standards recognized by MAKAUT\./gi, '').trim() : "Certificate description will appear here after generation.";
 
   // Get translated title
   const titles = getCertificateTitle(language);
 
   // Choose stamp and signature based on activity type
   const getStampAndSignature = (activityType?: string) => {
-    if (!activityType) return { 
+    if (!activityType) return {
       signature: "/placeholder.svg",
       signer: "ASHOK KUMAR GHOSH",
-      title: "Program Director" 
+      title: "Program Director"
     };
-    
     switch (activityType.toLowerCase()) {
       case 'internship':
-        return { 
+        return {
           signature: "/ananya_signature.png",
           signer: "D.R. KUHELI MONDAL",
-          title: "Internship Director" 
+          title: "Internship Director"
         };
       case 'webinar':
       case 'online course':
       case 'workshop':
-        return { 
+        return {
           signature: "/priya_signature.png",
           signer: "D.R. DIPAK KUMAR MONDAL",
-          title: "Course Director" 
+          title: "Course Director"
         };
       case 'hackathon':
-        return { 
+        return {
           signature: "/ramesh_signature.png",
           signer: "DILIP KUMAR GHOSH",
-          title: "Hackathon Director" 
+          title: "Hackathon Director"
         };
       case 'volunteering':
       case 'volunteer work':
-        return { 
+        return {
           signature: "/volunteer_signature.png",
           signer: "SOURAV YADAV",
-          title: "Volunteer Program Director" 
+          title: "Volunteer Program Director"
         };
       case 'project':
       case 'innovation':
-        return { 
+        return {
           signature: "/project_signature.png",
           signer: "ANINDITA BHATTACHARYA",
-          title: "Innovation Lead" 
+          title: "Innovation Lead"
         };
       default:
-        return { 
+        return {
           signature: "/priya_signature.png",
           signer: "ASHOK KUMAR GHOSH",
-          title: "Program Director" 
+          title: "Program Director"
         };
     }
   };
+  const {
+    signature,
+    signer,
+    title
+  } = getStampAndSignature(activity);
 
-  const { signature, signer, title } = getStampAndSignature(activity);
-  
   // Get template-specific styles
   const getTemplateStyles = () => {
-    switch(template) {
+    switch (template) {
       case 'modern':
         return "border-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50";
       case 'elegant':
@@ -117,14 +106,7 @@ export default function CertificatePreview({
         return "border-certigen-gold bg-certigen-cream";
     }
   };
-
-  return (
-    <div className={cn(
-      "certificate-container relative border-8 rounded-lg p-8 shadow-lg",
-      getTemplateStyles(),
-      "print:border-4 certificate-print-area",
-      className
-    )}>
+  return <div className={cn("certificate-container relative border-8 rounded-lg p-8 shadow-lg", getTemplateStyles(), "print:border-4 certificate-print-area", className)}>
       <div className="flex flex-col items-center text-center">
         {/* Certificate ID and Issue Date - Moved to top-right */}
         <div className="absolute top-6 right-6 text-right">
@@ -160,26 +142,22 @@ export default function CertificatePreview({
           {certificateText}
         </div>
         
-        {activity && (
-          <div className="my-3 border border-certigen-lightblue bg-blue-50 px-4 py-2 rounded-full flex items-center justify-center">
+        {activity && <div className="my-3 border border-certigen-lightblue bg-blue-50 px-4 py-2 rounded-full flex items-center justify-center">
             <span className="font-medium text-certigen-blue">{activity}</span>
-          </div>
-        )}
+          </div>}
         
         {/* Timestamp of activity */}
         <p className="text-sm text-certigen-gray mb-6">Completed on {date}</p>
         
         {/* Signature Area with enhanced styling */}
-        <div className="flex w-full justify-between mb-6 mt-6">
+        <div className="flex w-full justify-between mb-6 mt-6 mx-0 my-[60px]">
           <div className="flex flex-col items-center">
             <div className="mb-2">
               {/* Director Signature */}
-              <div className="w-16 h-16 mx-auto opacity-70">
-                <img src={signature} alt="Director Signature" className="w-full h-full object-contain" />
-              </div>
+              
             </div>
             <div className="w-36 border-b border-gray-400 pb-1 mb-1">
-              <p className="font-certificate italic">{signer}</p>
+              <p className="font-certificate italic py-0 mx-0 my-0">{signer}</p>
             </div>
             <p className="text-sm text-gray-600">{title}</p>
           </div>
@@ -187,12 +165,10 @@ export default function CertificatePreview({
           <div className="flex flex-col items-center">
             <div className="mb-2">
               {/* Executive Director Signature */}
-              <div className="w-16 h-16 mx-auto opacity-70">
-                <img src="/ananya_signature.png" alt="Executive Director Signature" className="w-full h-full object-contain" />
-              </div>
+              
             </div>
             <div className="w-36 border-b border-gray-400 pb-1 mb-1">
-              <p className="font-certificate italic">M.R Sumit Kumar Biswas</p>
+              <p className="font-certificate italic">M.R SUJIT KUMAR DEY</p>
             </div>
             <p className="text-sm text-gray-600">Executive Director</p>
           </div>
@@ -201,16 +177,12 @@ export default function CertificatePreview({
         {/* Bottom Section with QR Code and Certificate Details */}
         <div className="absolute bottom-6 left-6 flex items-start">
           {/* QR Code */}
-          <div className="bg-white p-2 rounded-md shadow-sm mr-4">
+          <div className="bg-white p-2 rounded-md shadow-sm mr-4 px-[2px] py-[5px] mx-0 my-0">
             <QrCode className="h-10 w-10 text-certigen-navy opacity-80" />
           </div>
           
           {/* Certificate Details */}
-          <div className="text-left">
-            <div className="flex items-center text-certigen-blue text-xs mb-1">
-              <span>Scan to verify certificate</span>
-            </div>
-          </div>
+          
         </div>
         
         {/* New Online Verified Certificate text at bottom-right */}
@@ -223,6 +195,5 @@ export default function CertificatePreview({
           Powered by CertiGen
         </div>
       </div>
-    </div>
-  );
+    </div>;
 }
