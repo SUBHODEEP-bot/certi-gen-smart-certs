@@ -7,14 +7,17 @@ import CertificatePreview from '@/components/CertificatePreview';
 import { Button } from '@/components/ui/button';
 import { generateCertificateId, generatePdf, CertificateData, saveGeneratedCertificateData } from '@/utils/certificate';
 import { useToast } from '@/hooks/use-toast';
-import { Download, Mail, Share, Printer, Check } from 'lucide-react';
+import { Download, Mail, Share, Printer, Check, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { PaymentModal } from '@/components/PaymentModal';
 
 const Generator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedCertificate, setGeneratedCertificate] = useState<CertificateData | null>(null);
   const [certificateId, setCertificateId] = useState<string>('');
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+  const [paymentCompleted, setPaymentCompleted] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -22,7 +25,6 @@ const Generator = () => {
     setIsGenerating(true);
     
     try {
-      // Payment has already been processed in the form component
       const newCertificateId = generateCertificateId();
       setCertificateId(newCertificateId);
       setGeneratedCertificate(values);
@@ -36,7 +38,7 @@ const Generator = () => {
       
       toast({
         title: "Certificate Generated",
-        description: "Your certificate has been generated successfully."
+        description: "Your certificate has been generated successfully. Please pay to download."
       });
     } catch (error) {
       toast({
@@ -50,7 +52,14 @@ const Generator = () => {
   };
   
   const handleDownload = async () => {
-    if (!generatedCertificate) return;
+    if (!generatedCertificate || !paymentCompleted) {
+      // If payment is not completed, show payment modal
+      if (!paymentCompleted) {
+        setShowPaymentModal(true);
+        return;
+      }
+      return;
+    }
     
     try {
       const doc = await generatePdf(generatedCertificate, certificateId);
@@ -69,7 +78,27 @@ const Generator = () => {
     }
   };
   
+  const handlePaymentSuccess = () => {
+    setPaymentCompleted(true);
+    setShowPaymentModal(false);
+    
+    toast({
+      title: "Payment Successful",
+      description: "Thank you for your payment. Your certificate is now ready for download."
+    });
+    
+    // Automatically trigger download after payment
+    setTimeout(() => {
+      handleDownload();
+    }, 500);
+  };
+  
   const handleEmailCertificate = () => {
+    if (!paymentCompleted) {
+      setShowPaymentModal(true);
+      return;
+    }
+    
     // In a real app, this would send the PDF to the user's email
     toast({
       title: "Email Sent",
@@ -78,6 +107,11 @@ const Generator = () => {
   };
   
   const handlePrintCertificate = () => {
+    if (!paymentCompleted) {
+      setShowPaymentModal(true);
+      return;
+    }
+    
     window.print();
     
     toast({
@@ -87,6 +121,11 @@ const Generator = () => {
   };
   
   const handleShareCertificate = () => {
+    if (!paymentCompleted) {
+      setShowPaymentModal(true);
+      return;
+    }
+    
     if (navigator.share) {
       navigator.share({
         title: 'My Certificate',
@@ -149,7 +188,7 @@ const Generator = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-lg">Certificate Generated Successfully!</h3>
-                    <p>Your certificate has been created and is ready to download.</p>
+                    <p>Your certificate has been created and is ready to download after payment.</p>
                   </div>
                 </div>
               </div>
@@ -163,17 +202,28 @@ const Generator = () => {
               <div className="flex flex-col md:flex-row gap-4 justify-center">
                 <Button 
                   onClick={handleDownload} 
-                  className="bg-certigen-blue hover:bg-certigen-navy"
+                  className={`${paymentCompleted ? "bg-certigen-blue hover:bg-certigen-navy" : "bg-gray-400 hover:bg-gray-500"} relative group`}
                   size="lg"
                 >
+                  {!paymentCompleted && (
+                    <div className="absolute inset-0 bg-black/5 flex items-center justify-center">
+                      <Lock className="h-5 w-5 text-gray-600 group-hover:text-gray-700" />
+                    </div>
+                  )}
                   <Download className="mr-2 h-5 w-5" />
-                  Download Certificate
+                  {paymentCompleted ? "Download Certificate" : "Pay ₹2 & Download"}
                 </Button>
                 <Button 
                   onClick={handleEmailCertificate} 
                   variant="outline"
                   size="lg"
+                  className={!paymentCompleted ? "relative group" : ""}
                 >
+                  {!paymentCompleted && (
+                    <div className="absolute inset-0 bg-black/5 flex items-center justify-center">
+                      <Lock className="h-5 w-5 text-gray-600 group-hover:text-gray-700" />
+                    </div>
+                  )}
                   <Mail className="mr-2 h-5 w-5" />
                   Email Certificate
                 </Button>
@@ -182,8 +232,13 @@ const Generator = () => {
                   onClick={handlePrintCertificate} 
                   variant="outline"
                   size="lg"
-                  className="border-certigen-lightblue text-certigen-blue"
+                  className={`border-certigen-lightblue text-certigen-blue ${!paymentCompleted ? "relative group" : ""}`}
                 >
+                  {!paymentCompleted && (
+                    <div className="absolute inset-0 bg-black/5 flex items-center justify-center">
+                      <Lock className="h-5 w-5 text-gray-600 group-hover:text-gray-700" />
+                    </div>
+                  )}
                   <Printer className="mr-2 h-5 w-5" />
                   Print Certificate
                 </Button>
@@ -192,8 +247,13 @@ const Generator = () => {
                   onClick={handleShareCertificate} 
                   variant="outline"
                   size="lg"
-                  className="border-certigen-lightblue text-certigen-blue"
+                  className={`border-certigen-lightblue text-certigen-blue ${!paymentCompleted ? "relative group" : ""}`}
                 >
+                  {!paymentCompleted && (
+                    <div className="absolute inset-0 bg-black/5 flex items-center justify-center">
+                      <Lock className="h-5 w-5 text-gray-600 group-hover:text-gray-700" />
+                    </div>
+                  )}
                   <Share className="mr-2 h-5 w-5" />
                   Share Certificate
                 </Button>
@@ -205,6 +265,7 @@ const Generator = () => {
                   onClick={() => {
                     setGeneratedCertificate(null);
                     setCertificateId('');
+                    setPaymentCompleted(false);
                   }}
                 >
                   Generate Another Certificate
@@ -215,6 +276,14 @@ const Generator = () => {
         </div>
       </main>
       <Footer />
+      
+      {/* Payment Modal */}
+      <PaymentModal 
+        isOpen={showPaymentModal} 
+        onClose={() => setShowPaymentModal(false)}
+        onPaymentSuccess={handlePaymentSuccess}
+        amount={2}
+      />
     </div>
   );
 }

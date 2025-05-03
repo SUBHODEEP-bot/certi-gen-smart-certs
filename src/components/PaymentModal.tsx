@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -21,30 +21,74 @@ export function PaymentModal({ isOpen, onClose, onPaymentSuccess, amount }: Paym
   const [isProcessing, setIsProcessing] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Initialize Razorpay script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
   
-  // Simulate payment process
+  // Process payment with Razorpay
   const processPayment = () => {
     setIsProcessing(true);
     setErrorMessage(null);
     
-    // Simulate API call to payment gateway
-    setTimeout(() => {
-      // Simulate successful payment (in a real app, this would be the response from payment gateway)
-      const paymentSuccessful = true; 
+    // Calculate total amount with GST
+    const totalAmount = amount * 1.18;
+    // Razorpay takes amount in paise (multiply by 100)
+    const amountInPaise = Math.round(totalAmount * 100);
+    
+    try {
+      // Initialize Razorpay options
+      const options = {
+        key: "rzp_test_StD5wShjMQBnXC", // Razorpay key
+        amount: amountInPaise,
+        currency: "INR",
+        name: "CertiGen",
+        description: "Certificate Generation Fee",
+        image: "/favicon.ico",
+        handler: function(response: any) {
+          // Payment successful
+          setIsComplete(true);
+          setTimeout(() => {
+            onPaymentSuccess();
+            // Reset state after success
+            setIsProcessing(false);
+            setIsComplete(false);
+          }, 1500);
+        },
+        prefill: {
+          name: "",
+          email: "",
+          contact: ""
+        },
+        notes: {
+          purpose: "Certificate generation"
+        },
+        theme: {
+          color: "#1a56db"
+        },
+        modal: {
+          ondismiss: function() {
+            setIsProcessing(false);
+          }
+        }
+      };
       
-      if (paymentSuccessful) {
-        setIsComplete(true);
-        setTimeout(() => {
-          onPaymentSuccess();
-          // Reset state after success
-          setIsProcessing(false);
-          setIsComplete(false);
-        }, 1500);
-      } else {
-        setErrorMessage("Payment failed. Please try again.");
-        setIsProcessing(false);
-      }
-    }, 2000);
+      // Create Razorpay instance and open payment modal
+      const razorpay = new (window as any).Razorpay(options);
+      razorpay.open();
+    } catch (error) {
+      console.error("Razorpay error:", error);
+      setErrorMessage("Payment initialization failed. Please try again.");
+      setIsProcessing(false);
+    }
   };
   
   return (
