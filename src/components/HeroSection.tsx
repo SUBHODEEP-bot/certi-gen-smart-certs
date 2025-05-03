@@ -72,9 +72,9 @@ export default function HeroSection() {
             }}>
                 <GraduationCap className="h-8 w-8 text-certigen-blue" />
               </div>
-              <div className="absolute -bottom-5 -right-5 bg-white p-3 rounded-full shadow-lg floating" style={{
+              <div style={{
               animationDelay: '0.5s'
-            }}>
+            }} className="absolute -bottom-5 -right-5 p-3 rounded-full shadow-lg floating bg-purple-950">
                 <Award className="h-8 w-8 text-certigen-gold" />
               </div>
               <div className="absolute bottom-20 -left-8 bg-white p-3 rounded-full shadow-lg floating" style={{
