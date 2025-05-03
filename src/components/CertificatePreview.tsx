@@ -2,7 +2,7 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { cn } from "@/lib/utils";
-import { QrCode, Stamp } from 'lucide-react';
+import { QrCode } from 'lucide-react';
 import { getCertificateTitle } from '@/utils/certificate';
 
 interface CertificateData {
@@ -51,11 +51,7 @@ export default function CertificatePreview({
 
   // Choose stamp and signature based on activity type
   const getStampAndSignature = (activityType?: string) => {
-    // Using consistent CertiGen stamp for all certificates
-    const certiGenStamp = "/lovable-uploads/7154962c-3d8c-4d09-920e-e84a1600b65a.png";
-    
     if (!activityType) return { 
-      stamp: certiGenStamp, 
       signature: "/placeholder.svg",
       signer: "ASHOK KUMAR GHOSH",
       title: "Program Director" 
@@ -64,7 +60,6 @@ export default function CertificatePreview({
     switch (activityType.toLowerCase()) {
       case 'internship':
         return { 
-          stamp: certiGenStamp, 
           signature: "/ananya_signature.png",
           signer: "D.R. KUHELI MONDAL",
           title: "Internship Director" 
@@ -73,14 +68,12 @@ export default function CertificatePreview({
       case 'online course':
       case 'workshop':
         return { 
-          stamp: certiGenStamp, 
           signature: "/priya_signature.png",
           signer: "D.R. DIPAK KUMAR MONDAL",
           title: "Course Director" 
         };
       case 'hackathon':
         return { 
-          stamp: certiGenStamp, 
           signature: "/ramesh_signature.png",
           signer: "DILIP KUMAR GHOSH",
           title: "Hackathon Director" 
@@ -88,7 +81,6 @@ export default function CertificatePreview({
       case 'volunteering':
       case 'volunteer work':
         return { 
-          stamp: certiGenStamp, 
           signature: "/volunteer_signature.png",
           signer: "SOURAV YADAV",
           title: "Volunteer Program Director" 
@@ -96,14 +88,12 @@ export default function CertificatePreview({
       case 'project':
       case 'innovation':
         return { 
-          stamp: certiGenStamp, 
           signature: "/project_signature.png",
           signer: "ANINDITA BHATTACHARYA",
           title: "Innovation Lead" 
         };
       default:
         return { 
-          stamp: certiGenStamp, 
           signature: "/priya_signature.png",
           signer: "ASHOK KUMAR GHOSH",
           title: "Program Director" 
@@ -111,7 +101,7 @@ export default function CertificatePreview({
     }
   };
 
-  const { stamp, signature, signer, title } = getStampAndSignature(activity);
+  const { signature, signer, title } = getStampAndSignature(activity);
   
   // Get template-specific styles
   const getTemplateStyles = () => {
@@ -136,19 +126,20 @@ export default function CertificatePreview({
       className
     )}>
       <div className="flex flex-col items-center text-center">
-        <div className="w-full flex justify-between mb-6">
+        {/* Certificate ID and Issue Date - Moved to top-right */}
+        <div className="absolute top-6 right-6 text-right">
           <div className="text-certigen-blue">
             <p className="text-sm">Certificate ID:</p>
             <p className="font-bold">{certificateId}</p>
           </div>
-          <div className="text-certigen-blue">
+          <div className="text-certigen-blue mt-2">
             <p className="text-sm">Issue Date:</p>
             <p className="font-bold">{format(currentDate, "d MMMM yyyy")}</p>
           </div>
         </div>
         
         {/* Certificate Header with enhanced styling */}
-        <div className="flex flex-col items-center mb-6">
+        <div className="flex flex-col items-center mb-6 mt-6">
           <h1 className="text-2xl md:text-3xl font-bold mb-1 text-certigen-navy">{titles.certificate}</h1>
           <h2 className="text-xl md:text-2xl font-semibold mb-1 text-certigen-navy">{titles.ofAchievement}</h2>
           <div className="w-24 h-1 bg-certigen-gold mb-4"></div>
@@ -206,22 +197,8 @@ export default function CertificatePreview({
             <p className="text-sm text-gray-600">Executive Director</p>
           </div>
         </div>
-
-        {/* Official CertiGen Stamp - positioned at bottom right */}
-        <div className="absolute bottom-12 right-12 flex flex-col items-center">
-          <div className="w-24 h-24">
-            {stamp ? (
-              <img src={stamp} alt="Official Stamp" className="w-full h-full object-contain" />
-            ) : (
-              <div className="flex flex-col items-center justify-center bg-white bg-opacity-50 rounded-full w-full h-full">
-                <Stamp className="h-12 w-12 text-certigen-navy opacity-80" />
-                <p className="text-xs text-certigen-navy font-bold mt-1">CERTIGEN</p>
-              </div>
-            )}
-          </div>
-        </div>
         
-        {/* Bottom Section with QR Code and Certificate Details - improved positioning */}
+        {/* Bottom Section with QR Code and Certificate Details */}
         <div className="absolute bottom-6 left-6 flex items-start">
           {/* QR Code */}
           <div className="bg-white p-2 rounded-md shadow-sm mr-4">
@@ -233,13 +210,17 @@ export default function CertificatePreview({
             <div className="flex items-center text-certigen-blue text-xs mb-1">
               <span>Scan to verify certificate</span>
             </div>
-            <p className="text-xs text-gray-500">Certificate ID: {certificateId}</p>
-            <p className="text-xs text-gray-500">Issue Date: {format(currentDate, "d MMMM yyyy")}</p>
           </div>
         </div>
         
+        {/* New Online Verified Certificate text at bottom-right */}
+        <div className="absolute bottom-6 right-6 text-xs text-certigen-blue font-semibold">
+          Online Verified Certificate
+        </div>
+        
+        {/* Updated footer text - centered at bottom */}
         <div className="text-xs text-gray-500 italic absolute bottom-3 w-full text-center">
-          Powered by CertiGen - Professional Certificate Generator
+          Powered by CertiGen
         </div>
       </div>
     </div>

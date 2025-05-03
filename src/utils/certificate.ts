@@ -21,13 +21,9 @@ export const generateCertificateId = () => {
 
 // Get stamp and signature based on activity
 export const getAssetsByActivityType = (activity: string) => {
-  // Common stamp for all certificates
-  const certiGenStamp = "/lovable-uploads/7154962c-3d8c-4d09-920e-e84a1600b65a.png"; // Using the uploaded CertiGen stamp
-  
   switch (activity.toLowerCase()) {
     case 'internship':
       return { 
-        stamp: certiGenStamp, 
         signature: "/ananya_signature.png",
         signer: "D.R. KUHELI MONDAL",
         title: "Internship Director"
@@ -36,14 +32,12 @@ export const getAssetsByActivityType = (activity: string) => {
     case 'online course':
     case 'workshop':
       return { 
-        stamp: certiGenStamp, 
         signature: "/priya_signature.png",
         signer: "D.R. DIPAK KUMAR MONDAL",
         title: "Course Director"
       };
     case 'hackathon':
       return { 
-        stamp: certiGenStamp, 
         signature: "/ramesh_signature.png",
         signer: "DILIP KUMAR GHOSH",
         title: "Hackathon Director"
@@ -51,7 +45,6 @@ export const getAssetsByActivityType = (activity: string) => {
     case 'volunteering':
     case 'volunteer work':
       return { 
-        stamp: certiGenStamp, 
         signature: "/volunteer_signature.png",
         signer: "SOURAV YADAV",
         title: "Volunteer Program Director"
@@ -59,14 +52,12 @@ export const getAssetsByActivityType = (activity: string) => {
     case 'project':
     case 'innovation':
       return { 
-        stamp: certiGenStamp, 
         signature: "/project_signature.png",
         signer: "ANINDITA BHATTACHARYA",
         title: "Innovation Lead"
       };
     default:
       return { 
-        stamp: certiGenStamp, 
         signature: "/priya_signature.png",
         signer: "ASHOK KUMAR GHOSH",
         title: "Program Director"
@@ -186,6 +177,13 @@ export const generatePdf = async (certificateData: CertificateData, certificateI
   doc.setLineWidth(1);
   doc.line(pageWidth / 2 - 30, 55, pageWidth / 2 + 30, 55);
   
+  // Certificate ID and Issue Date - now at top right
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(100, 100, 100);
+  doc.text(`Certificate ID: ${certificateId}`, pageWidth - margin - 50, margin + 10);
+  doc.text(`Issue Date: ${format(new Date(), 'd MMMM yyyy')}`, pageWidth - margin - 50, margin + 15);
+  
   // Recipient name
   doc.setFont("helvetica", "bold");
   doc.setFontSize(24);
@@ -230,7 +228,7 @@ export const generatePdf = async (certificateData: CertificateData, certificateI
   doc.text(activity, pageWidth / 2, 119, { align: "center" });
   
   // Get custom assets based on activity type
-  const { signer, title, stamp } = getAssetsByActivityType(activity);
+  const { signer, title } = getAssetsByActivityType(activity);
   
   // Signatures
   doc.setLineWidth(0.5);
@@ -254,13 +252,7 @@ export const generatePdf = async (certificateData: CertificateData, certificateI
   doc.setFontSize(10);
   doc.text(title, pageWidth - 90, 165, { align: "center" });
   
-  // Certificate ID and date - positioned at bottom left
-  doc.setFontSize(10);
-  doc.setTextColor(100, 100, 100);
-  doc.text(`Certificate ID: ${certificateId}`, margin + 5, pageHeight - 15);
-  doc.text(`Issue Date: ${format(new Date(), 'd MMMM yyyy')}`, margin + 5, pageHeight - 10);
-  
-  // QR Code - positioned at bottom left near the certificate ID and date
+  // QR Code - positioned at bottom left
   if (qrCodeDataUrl) {
     doc.addImage(qrCodeDataUrl, 'PNG', margin + 5, pageHeight - margin - 30, 20, 20);
     doc.setFontSize(6);
@@ -268,13 +260,15 @@ export const generatePdf = async (certificateData: CertificateData, certificateI
     doc.text("Scan to verify", margin + 15, pageHeight - margin - 32, { align: "center" });
   }
   
-  // Add CertiGen stamp in a prominent position
-  doc.addImage(stamp, 'PNG', pageWidth - margin - 40, pageHeight - margin - 40, 35, 35);
+  // Add "Online Verified Certificate" text at bottom right
+  doc.setFontSize(8);
+  doc.setTextColor(26, 86, 219);
+  doc.text("Online Verified Certificate", pageWidth - margin - 20, pageHeight - margin - 5, { align: "center" });
   
   // Footer
   doc.setFontSize(8);
   doc.setTextColor(150, 150, 150);
-  doc.text("Powered by CertiGen - Professional Certificate Generator", pageWidth / 2, pageHeight - 5, { align: "center" });
+  doc.text("Powered by CertiGen", pageWidth / 2, pageHeight - 5, { align: "center" });
   
   return doc;
 };
