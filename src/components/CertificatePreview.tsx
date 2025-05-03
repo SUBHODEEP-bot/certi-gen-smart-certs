@@ -1,10 +1,8 @@
-
 import React from 'react';
 import { format } from 'date-fns';
 import { cn } from "@/lib/utils";
 import { QrCode } from 'lucide-react';
 import { getCertificateTitle } from '@/utils/certificate';
-
 interface CertificateData {
   fullName?: string;
   activity?: string;
@@ -14,13 +12,11 @@ interface CertificateData {
   language?: 'english' | 'bengali' | 'hindi';
   template?: 'classic' | 'modern' | 'elegant' | 'professional';
 }
-
 interface CertificatePreviewProps {
   certificateData: CertificateData | null;
   certificateId?: string;
   className?: string;
 }
-
 export default function CertificatePreview({
   certificateData,
   certificateId = "PREVIEW",
@@ -181,9 +177,7 @@ export default function CertificatePreview({
         {/* Bottom Section with QR Code - Fixed positioning */}
         <div className="absolute bottom-10 left-6 flex items-start">
           {/* QR Code */}
-          <div className="bg-white p-2 rounded-md shadow-sm mr-4 px-[2px] py-[5px] mx-0 my-0">
-            <QrCode className="h-10 w-10 text-certigen-navy opacity-80" />
-          </div>
+          
         </div>
         
         {/* Online Verified Certificate text at bottom-right */}
