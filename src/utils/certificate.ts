@@ -177,12 +177,12 @@ export const generatePdf = async (certificateData: CertificateData, certificateI
   doc.setLineWidth(1);
   doc.line(pageWidth / 2 - 30, 55, pageWidth / 2 + 30, 55);
   
-  // Certificate ID and Issue Date - now at top right with better positioning
+  // Certificate ID and Issue Date - FIXED: moved 30px to the left from the right edge
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(100, 100, 100);
-  doc.text(`Certificate ID: ${certificateId}`, pageWidth - margin - 45, margin + 10);
-  doc.text(`Issue Date: ${format(new Date(), 'd MMMM yyyy')}`, pageWidth - margin - 45, margin + 15);
+  doc.text(`Certificate ID: ${certificateId}`, pageWidth - margin - 75, margin + 10); // Moved from margin - 45 to margin - 75
+  doc.text(`Issue Date: ${format(new Date(), 'd MMMM yyyy')}`, pageWidth - margin - 75, margin + 15); // Moved from margin - 45 to margin - 75
   
   // Recipient name
   doc.setFont("helvetica", "bold");
