@@ -14,7 +14,9 @@ const Index = () => {
       <NavBar />
       <main>
         <HeroSection />
-        <MarPointsSection />
+        <div id="mar-points">
+          <MarPointsSection />
+        </div>
         <FeaturesSection />
         <PricingSection />
         <TestimonialSection />

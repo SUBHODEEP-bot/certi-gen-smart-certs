@@ -1,23 +1,38 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
 
 export default function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
+
+  // Make sure all links work correctly
+  const LinkComponent = ({ to, className, children, onClick }: { 
+    to: string; 
+    className?: string; 
+    children: React.ReactNode; 
+    onClick?: () => void 
+  }) => {
+    return (
+      <Link to={to} className={className} onClick={onClick}>
+        {children}
+      </Link>
+    );
+  };
 
   return (
     <header className="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-sm">
       <div className="container flex items-center justify-between h-16 mx-auto px-4">
-        <Link to="/" className="flex items-center">
+        <LinkComponent to="/" className="flex items-center">
           <div className="flex items-center">
             <span className="text-2xl font-bold text-certigen-navy">
               Certi<span className="text-certigen-blue">Gen</span>
             </span>
             <span className="ml-2 bg-certigen-blue text-white text-xs px-2 py-1 rounded-md">MAKAUT</span>
           </div>
-        </Link>
+        </LinkComponent>
         
         {/* Mobile menu button */}
         <div className="md:hidden">
@@ -37,26 +52,30 @@ export default function NavBar() {
         
         {/* Desktop navigation */}
         <nav className="hidden md:flex items-center space-x-8">
-          <Link to="/" className="text-gray-700 hover:text-certigen-blue transition-colors">
+          <LinkComponent to="/" className="text-gray-700 hover:text-certigen-blue transition-colors">
             Home
-          </Link>
-          <Link to="/generator" className="text-gray-700 hover:text-certigen-blue transition-colors">
+          </LinkComponent>
+          <LinkComponent to="/generator" className="text-gray-700 hover:text-certigen-blue transition-colors">
             Generate Certificate
-          </Link>
-          <Link to="/verify" className="text-gray-700 hover:text-certigen-blue transition-colors">
+          </LinkComponent>
+          <LinkComponent to="/verify" className="text-gray-700 hover:text-certigen-blue transition-colors">
             Verify Certificate
-          </Link>
+          </LinkComponent>
           <a href="#mar-points" className="text-gray-700 hover:text-certigen-blue transition-colors">
             MAR Points
           </a>
         </nav>
         
         <div className="hidden md:flex items-center space-x-4">
-          <Button variant="outline">
-            Admin Login
+          <Button variant="outline" asChild>
+            <LinkComponent to="/admin">
+              Admin Login
+            </LinkComponent>
           </Button>
-          <Button className="bg-certigen-blue hover:bg-certigen-navy">
-            Get Started
+          <Button className="bg-certigen-blue hover:bg-certigen-navy" asChild>
+            <LinkComponent to="/generator">
+              Get Started
+            </LinkComponent>
           </Button>
         </div>
       </div>
@@ -64,27 +83,27 @@ export default function NavBar() {
       {/* Mobile menu */}
       <div className={`md:hidden ${isMenuOpen ? 'block' : 'hidden'} py-4 bg-white border-t border-gray-100 px-4`}>
         <div className="flex flex-col space-y-3">
-          <Link 
+          <LinkComponent
             to="/" 
             className="text-gray-700 hover:text-certigen-blue py-2 px-3 rounded-md hover:bg-blue-50"
             onClick={() => setIsMenuOpen(false)}
           >
             Home
-          </Link>
-          <Link 
+          </LinkComponent>
+          <LinkComponent
             to="/generator" 
             className="text-gray-700 hover:text-certigen-blue py-2 px-3 rounded-md hover:bg-blue-50"
             onClick={() => setIsMenuOpen(false)}
           >
             Generate Certificate
-          </Link>
-          <Link 
+          </LinkComponent>
+          <LinkComponent
             to="/verify" 
             className="text-gray-700 hover:text-certigen-blue py-2 px-3 rounded-md hover:bg-blue-50"
             onClick={() => setIsMenuOpen(false)}
           >
             Verify Certificate
-          </Link>
+          </LinkComponent>
           <a 
             href="#mar-points" 
             className="text-gray-700 hover:text-certigen-blue py-2 px-3 rounded-md hover:bg-blue-50"
@@ -93,11 +112,15 @@ export default function NavBar() {
             MAR Points
           </a>
           <div className="pt-2 flex flex-col gap-2">
-            <Button variant="outline" className="w-full justify-center">
-              Admin Login
+            <Button variant="outline" className="w-full justify-center" asChild>
+              <LinkComponent to="/admin">
+                Admin Login
+              </LinkComponent>
             </Button>
-            <Button className="w-full justify-center bg-certigen-blue hover:bg-certigen-navy">
-              Get Started
+            <Button className="w-full justify-center bg-certigen-blue hover:bg-certigen-navy" asChild>
+              <LinkComponent to="/generator">
+                Get Started
+              </LinkComponent>
             </Button>
           </div>
         </div>

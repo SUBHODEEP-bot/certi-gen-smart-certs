@@ -1,8 +1,20 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 export default function Footer() {
+  // Check if we're in a route context
+  const location = useLocation();
+  
+  // This will store either Link components or regular anchor tags
+  const LinkComponent = ({ to, children, className }: { to: string; children: React.ReactNode; className?: string }) => {
+    return (
+      <Link to={to} className={className}>
+        {children}
+      </Link>
+    );
+  };
+
   return (
     <footer className="bg-gray-50 border-t border-gray-200 mt-auto">
       <div className="container mx-auto px-4 py-8">
@@ -20,19 +32,19 @@ export default function Footer() {
             <h4 className="font-semibold mb-4 text-gray-700">Quick Links</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="text-gray-600 hover:text-certigen-blue">
+                <LinkComponent to="/" className="text-gray-600 hover:text-certigen-blue">
                   Home
-                </Link>
+                </LinkComponent>
               </li>
               <li>
-                <Link to="/generator" className="text-gray-600 hover:text-certigen-blue">
+                <LinkComponent to="/generator" className="text-gray-600 hover:text-certigen-blue">
                   Generate Certificate
-                </Link>
+                </LinkComponent>
               </li>
               <li>
-                <Link to="/verify" className="text-gray-600 hover:text-certigen-blue">
+                <LinkComponent to="/verify" className="text-gray-600 hover:text-certigen-blue">
                   Verify Certificate
-                </Link>
+                </LinkComponent>
               </li>
             </ul>
           </div>
