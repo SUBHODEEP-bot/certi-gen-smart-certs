@@ -1,12 +1,9 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { CheckCircle, GraduationCap, Award, Code } from 'lucide-react';
-
 export default function HeroSection() {
-  return (
-    <div className="bg-gradient-to-b from-blue-50 to-white relative overflow-hidden">
+  return <div className="bg-gradient-to-b from-blue-50 to-white relative overflow-hidden">
       {/* Background decoration elements */}
       <div className="absolute top-20 right-10 w-48 h-48 bg-certigen-blue opacity-5 rounded-full blur-3xl"></div>
       <div className="absolute bottom-10 left-20 w-72 h-72 bg-certigen-gold opacity-5 rounded-full blur-3xl"></div>
@@ -25,10 +22,7 @@ export default function HeroSection() {
               Professional <span className="text-certigen-blue">Certificates</span> for Engineering Students
             </h1>
             
-            <p className="text-lg lg:text-xl text-gray-700 mb-8">
-              Generate industry-recognized certificates for hackathons, workshops, and projects. 
-              Earn MAR points and boost your academic profile for just ₹5 per certificate.
-            </p>
+            <p className="text-lg lg:text-xl text-gray-700 mb-8">Generate industry-recognized certificates for hackathons, workshops, and projects. Earn MAR points and boost your academic profile for just ₹2 per certificate.</p>
             
             <div className="grid grid-cols-2 gap-4 mb-8">
               <div className="flex items-start space-x-2">
@@ -68,16 +62,24 @@ export default function HeroSection() {
               {/* Decorative elements */}
               <div className="absolute -top-6 -left-16 w-14 h-14 bg-certigen-gold rounded-lg opacity-20 floating"></div>
               <div className="absolute top-10 -right-8 w-20 h-20 border-4 border-certigen-blue rounded-full opacity-20 spin-slow"></div>
-              <div className="absolute bottom-10 -left-10 w-16 h-16 bg-certigen-lightblue rounded-lg opacity-20 floating" style={{animationDelay: '1s'}}></div>
+              <div className="absolute bottom-10 -left-10 w-16 h-16 bg-certigen-lightblue rounded-lg opacity-20 floating" style={{
+              animationDelay: '1s'
+            }}></div>
               
               {/* Education icons */}
-              <div className="absolute -top-10 right-20 bg-white p-3 rounded-full shadow-lg floating" style={{animationDelay: '1.2s'}}>
+              <div className="absolute -top-10 right-20 bg-white p-3 rounded-full shadow-lg floating" style={{
+              animationDelay: '1.2s'
+            }}>
                 <GraduationCap className="h-8 w-8 text-certigen-blue" />
               </div>
-              <div className="absolute -bottom-5 -right-5 bg-white p-3 rounded-full shadow-lg floating" style={{animationDelay: '0.5s'}}>
+              <div className="absolute -bottom-5 -right-5 bg-white p-3 rounded-full shadow-lg floating" style={{
+              animationDelay: '0.5s'
+            }}>
                 <Award className="h-8 w-8 text-certigen-gold" />
               </div>
-              <div className="absolute bottom-20 -left-8 bg-white p-3 rounded-full shadow-lg floating" style={{animationDelay: '0.8s'}}>
+              <div className="absolute bottom-20 -left-8 bg-white p-3 rounded-full shadow-lg floating" style={{
+              animationDelay: '0.8s'
+            }}>
                 <Code className="h-8 w-8 text-certigen-navy" />
               </div>
               
@@ -127,9 +129,7 @@ export default function HeroSection() {
                     </div>
                     
                     {/* MAR Points indicator */}
-                    <div className="bg-blue-50 text-certigen-blue px-4 py-1 rounded-full text-sm font-bold mb-3">
-                      MAR Points: 8
-                    </div>
+                    
                     
                     <div className="text-xs text-gray-500 italic mt-2 opacity-60">
                       Powered by CertiGen
@@ -141,6 +141,5 @@ export default function HeroSection() {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 }
