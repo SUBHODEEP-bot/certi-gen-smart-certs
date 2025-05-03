@@ -150,7 +150,7 @@ export default function CertificatePreview({
         <p className="text-sm text-certigen-gray mb-6">Completed on {date}</p>
         
         {/* Signature Area with enhanced styling */}
-        <div className="flex w-full justify-between mb-6 mt-6 mx-0 my-[60px]">
+        <div className="flex w-full justify-between mb-6 mt-6 mx-0 my-[55px]">
           <div className="flex flex-col items-center">
             <div className="mb-2">
               {/* Director Signature */}
