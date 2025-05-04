@@ -195,15 +195,17 @@ export default function CertificatePreview({
           </div>
         </div>
         
-        {/* QR Code for verification - UPDATED positioning and text alignment */}
+        {/* QR Code for verification - IMPROVED text formatting */}
         <div className="absolute bottom-10 right-6 flex flex-col items-center w-24">
           <QrCode className="h-16 w-16 mb-1" />
-          <p className="text-xs text-certigen-blue font-medium text-center">
-            Online Verified Certificate
-          </p>
-          <p className="text-xs text-certigen-blue font-medium text-center">
-            📱 Scan to Verify
-          </p>
+          <div className="text-center w-full">
+            <p className="text-[10px] leading-tight text-certigen-blue font-medium">
+              Online Verified Certificate
+            </p>
+            <p className="text-[10px] leading-tight text-certigen-blue font-medium">
+              Scan to Verify
+            </p>
+          </div>
         </div>
         
         {/* Updated footer text - centered at bottom */}
