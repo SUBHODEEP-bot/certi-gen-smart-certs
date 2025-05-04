@@ -54,7 +54,7 @@ export default function Footer() {
             <ul className="space-y-2 text-gray-600">
               <li>Email: support@certigen.com</li>
               
-              <li>Address: Bangalore, India</li>
+              <li>Address: Kolkata,West Bengal, India.</li>
             </ul>
           </div>
         </div>
