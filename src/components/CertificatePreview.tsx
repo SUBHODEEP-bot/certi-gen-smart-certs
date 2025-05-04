@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { format } from 'date-fns';
 import { cn } from "@/lib/utils";
@@ -194,15 +195,15 @@ export default function CertificatePreview({
           </div>
         </div>
         
-        {/* QR Code for verification */}
-        <div className="absolute bottom-10 right-6 flex flex-col items-center">
+        {/* QR Code for verification - UPDATED positioning and text alignment */}
+        <div className="absolute bottom-10 right-6 flex flex-col items-center w-24">
           <QrCode className="h-16 w-16 mb-1" />
-          <p className="text-xs text-certigen-blue font-medium">📱 Scan to Verify</p>
-        </div>
-        
-        {/* Online Verified Certificate text at bottom-right */}
-        <div className="absolute bottom-6 right-6 text-xs text-certigen-blue font-semibold">
-          Online Verified Certificate
+          <p className="text-xs text-certigen-blue font-medium text-center">
+            Online Verified Certificate
+          </p>
+          <p className="text-xs text-certigen-blue font-medium text-center">
+            📱 Scan to Verify
+          </p>
         </div>
         
         {/* Updated footer text - centered at bottom */}

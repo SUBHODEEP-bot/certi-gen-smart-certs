@@ -1,4 +1,3 @@
-
 import { jsPDF } from 'jspdf';
 import { format } from 'date-fns';
 import QRCode from 'qrcode';
@@ -271,19 +270,19 @@ export const generatePdf = async (certificateData: CertificateData, certificateI
   doc.text("certigen.official@gmail.com", margin + 5, pageHeight - margin - 10);
   doc.text("https://certigen.vercel.app", margin + 5, pageHeight - margin - 5);
   
-  // QR Code - positioned at bottom right with "Scan to Verify" text
+  // QR Code - positioned at bottom right with updated text alignment
   if (qrCodeDataUrl) {
     doc.addImage(qrCodeDataUrl, 'PNG', pageWidth - margin - 30, pageHeight - margin - 35, 25, 25);
-    doc.setFontSize(8);
+    doc.setFontSize(7);
     doc.setTextColor(26, 86, 219);
     doc.setFont("helvetica", "bold");
-    doc.text("📱 Scan to Verify", pageWidth - margin - 18, pageHeight - margin - 5);
+    doc.text("Online Verified Certificate", pageWidth - margin - 17.5, pageHeight - margin - 8, { 
+      align: "center" 
+    });
+    doc.text("📱 Scan to Verify", pageWidth - margin - 17.5, pageHeight - margin - 5, { 
+      align: "center" 
+    });
   }
-  
-  // Add "Online Verified Certificate" text at bottom right
-  doc.setFontSize(8);
-  doc.setTextColor(26, 86, 219);
-  doc.text("Online Verified Certificate", pageWidth - margin - 60, pageHeight - margin - 5);
   
   // Footer
   doc.setFontSize(8);
