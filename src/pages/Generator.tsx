@@ -7,7 +7,7 @@ import CertificatePreview from '@/components/CertificatePreview';
 import { Button } from '@/components/ui/button';
 import { generateCertificateId, generatePdf, CertificateData, saveGeneratedCertificateData } from '@/utils/certificate';
 import { useToast } from '@/hooks/use-toast';
-import { Download, Mail, Share, Printer, Check, Lock } from 'lucide-react';
+import { Download, Mail, Share, Printer, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PaymentModal } from '@/components/PaymentModal';
 
@@ -38,7 +38,7 @@ const Generator = () => {
       
       toast({
         title: "Certificate Generated",
-        description: "Your certificate has been generated successfully. Please pay to download."
+        description: "Your certificate has been generated successfully. Click download to get your certificate."
       });
     } catch (error) {
       toast({
@@ -52,12 +52,13 @@ const Generator = () => {
   };
   
   const handleDownload = async () => {
-    if (!generatedCertificate || !paymentCompleted) {
-      // If payment is not completed, show payment modal
-      if (!paymentCompleted) {
-        setShowPaymentModal(true);
-        return;
-      }
+    if (!generatedCertificate) {
+      return;
+    }
+    
+    // If payment is not completed, show payment modal
+    if (!paymentCompleted) {
+      setShowPaymentModal(true);
       return;
     }
     
@@ -83,8 +84,8 @@ const Generator = () => {
     setShowPaymentModal(false);
     
     toast({
-      title: "Payment Successful",
-      description: "Thank you for your payment. Your certificate is now ready for download."
+      title: "Download Ready",
+      description: "Your certificate is now ready for download."
     });
     
     // Automatically trigger download after payment
@@ -167,7 +168,6 @@ const Generator = () => {
               <h1 className="text-3xl md:text-4xl font-bold text-certigen-navy">Generate Your Certificate</h1>
               <p className="text-lg text-gray-600">
                 Fill out the form below to create your professional certificate instantly.
-                Only ₹2 per certificate.
               </p>
             </div>
           </div>
@@ -197,8 +197,14 @@ const Generator = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-lg">Certificate Generated Successfully!</h3>
-                    <p>Your certificate has been created and is ready to download after payment.</p>
+                    <p>Your certificate has been created and is ready to download.</p>
                   </div>
+                </div>
+                
+                <div className="mt-3 bg-blue-50 border border-blue-200 rounded-md p-3">
+                  <p className="text-blue-700 text-sm">
+                    💳 Online payment system will be available soon once LIVE Razorpay mode is activated.
+                  </p>
                 </div>
               </div>
               
@@ -211,28 +217,17 @@ const Generator = () => {
               <div className="flex flex-col md:flex-row gap-4 justify-center">
                 <Button 
                   onClick={handleDownload} 
-                  className={`${paymentCompleted ? "bg-certigen-blue hover:bg-certigen-navy" : "bg-gray-400 hover:bg-gray-500"} relative group`}
+                  className="bg-certigen-blue hover:bg-certigen-navy"
                   size="lg"
                 >
-                  {!paymentCompleted && (
-                    <div className="absolute inset-0 bg-black/5 flex items-center justify-center">
-                      <Lock className="h-5 w-5 text-gray-600 group-hover:text-gray-700" />
-                    </div>
-                  )}
                   <Download className="mr-2 h-5 w-5" />
-                  {paymentCompleted ? "Download Certificate" : "Pay ₹2 & Download"}
+                  Download Certificate
                 </Button>
                 <Button 
                   onClick={handleEmailCertificate} 
                   variant="outline"
                   size="lg"
-                  className={!paymentCompleted ? "relative group" : ""}
                 >
-                  {!paymentCompleted && (
-                    <div className="absolute inset-0 bg-black/5 flex items-center justify-center">
-                      <Lock className="h-5 w-5 text-gray-600 group-hover:text-gray-700" />
-                    </div>
-                  )}
                   <Mail className="mr-2 h-5 w-5" />
                   Email Certificate
                 </Button>
@@ -241,13 +236,8 @@ const Generator = () => {
                   onClick={handlePrintCertificate} 
                   variant="outline"
                   size="lg"
-                  className={`border-certigen-lightblue text-certigen-blue ${!paymentCompleted ? "relative group" : ""}`}
+                  className="border-certigen-lightblue text-certigen-blue"
                 >
-                  {!paymentCompleted && (
-                    <div className="absolute inset-0 bg-black/5 flex items-center justify-center">
-                      <Lock className="h-5 w-5 text-gray-600 group-hover:text-gray-700" />
-                    </div>
-                  )}
                   <Printer className="mr-2 h-5 w-5" />
                   Print Certificate
                 </Button>
@@ -256,13 +246,8 @@ const Generator = () => {
                   onClick={handleShareCertificate} 
                   variant="outline"
                   size="lg"
-                  className={`border-certigen-lightblue text-certigen-blue ${!paymentCompleted ? "relative group" : ""}`}
+                  className="border-certigen-lightblue text-certigen-blue"
                 >
-                  {!paymentCompleted && (
-                    <div className="absolute inset-0 bg-black/5 flex items-center justify-center">
-                      <Lock className="h-5 w-5 text-gray-600 group-hover:text-gray-700" />
-                    </div>
-                  )}
                   <Share className="mr-2 h-5 w-5" />
                   Share Certificate
                 </Button>

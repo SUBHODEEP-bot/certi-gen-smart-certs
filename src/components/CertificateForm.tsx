@@ -187,8 +187,8 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
   }
 
   function handleSubmit(values: CertificateFormValues) {
-    setSubmittedValues(values);
-    setShowPaymentModal(true);
+    // Directly submit the form values without showing payment modal
+    onSubmit(values);
   }
   
   function handlePaymentSuccess() {
@@ -433,8 +433,14 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
                   className="flex-1 bg-certigen-blue hover:bg-certigen-navy"
                   disabled={isGenerating || !form.getValues().certificateText}
                 >
-                  {isGenerating ? "Generating..." : "Pay ₹2 & Generate"}
+                  {isGenerating ? "Generating..." : "Generate Certificate"}
                 </Button>
+              </div>
+              
+              <div className="bg-blue-50 border border-blue-100 rounded-md p-3 mt-2">
+                <p className="text-blue-700 text-sm text-center">
+                  💳 Online payment system will be available soon once LIVE Razorpay mode is activated.
+                </p>
               </div>
             </form>
           </Form>
@@ -445,13 +451,15 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
         <CertificatePreview certificateData={previewData} />
       </div>
       
-      {/* Payment Modal */}
+      {/* Payment Modal - kept for future integration */}
+      {/* 
       <PaymentModal 
         isOpen={showPaymentModal} 
         onClose={() => setShowPaymentModal(false)}
         onPaymentSuccess={handlePaymentSuccess}
         amount={2}
       />
+      */}
     </div>
   );
 }
