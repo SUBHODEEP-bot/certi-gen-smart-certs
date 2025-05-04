@@ -1,3 +1,4 @@
+
 import { jsPDF } from 'jspdf';
 import { format } from 'date-fns';
 import QRCode from 'qrcode';
@@ -124,7 +125,7 @@ export const getCertificateTitle = (language: SupportedLanguage = 'english') => 
 // Generate QR Code for certificate verification
 export const generateQRCode = async (certificateId: string): Promise<string> => {
   try {
-    const verifyUrl = `${window.location.origin}/verify?id=${certificateId}`;
+    const verifyUrl = `https://certigen.vercel.app/verify?cert_id=${certificateId}`;
     return await QRCode.toDataURL(verifyUrl);
   } catch (error) {
     console.error("Error generating QR code:", error);
@@ -163,38 +164,45 @@ export const generatePdf = async (certificateData: CertificateData, certificateI
   // Get translated titles
   const titles = getCertificateTitle(language);
   
+  // Add institution logo
+  try {
+    doc.addImage('/lovable-uploads/5428d286-91c0-4ac3-b06d-eb661c1ca0be.png', 'PNG', pageWidth / 2 - 20, 20, 40, 25);
+  } catch (error) {
+    console.error("Error adding logo to PDF:", error);
+  }
+  
   // Certificate heading
   doc.setFont("helvetica", "bold");
   doc.setFontSize(30);
   doc.setTextColor(26, 86, 219); // Blue color
-  doc.text(titles.certificate, pageWidth / 2, 40, { align: "center" });
+  doc.text(titles.certificate, pageWidth / 2, 55, { align: "center" });
   
   doc.setFontSize(24);
-  doc.text(titles.ofAchievement, pageWidth / 2, 50, { align: "center" });
+  doc.text(titles.ofAchievement, pageWidth / 2, 65, { align: "center" });
   
   // Gold line separator
   doc.setDrawColor(245, 158, 11);
   doc.setLineWidth(1);
-  doc.line(pageWidth / 2 - 30, 55, pageWidth / 2 + 30, 55);
+  doc.line(pageWidth / 2 - 30, 70, pageWidth / 2 + 30, 70);
   
-  // Certificate ID and Issue Date - FIXED: moved 30px to the left from the right edge
+  // Certificate ID and Issue Date - Fixed position moved 30px left from right edge
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(100, 100, 100);
-  doc.text(`Certificate ID: ${certificateId}`, pageWidth - margin - 75, margin + 10); // Moved from margin - 45 to margin - 75
-  doc.text(`Issue Date: ${format(new Date(), 'd MMMM yyyy')}`, pageWidth - margin - 75, margin + 15); // Moved from margin - 45 to margin - 75
+  doc.text(`Certificate ID: ${certificateId}`, pageWidth - margin - 75, margin + 10);
+  doc.text(`Issue Date: ${format(new Date(), 'd MMMM yyyy')}`, pageWidth - margin - 75, margin + 15);
   
   // Recipient name
   doc.setFont("helvetica", "bold");
   doc.setFontSize(24);
   doc.setTextColor(26, 86, 219);
-  doc.text(fullName, pageWidth / 2, 70, { align: "center" });
+  doc.text(fullName, pageWidth / 2, 85, { align: "center" });
   
   // College name
   doc.setFont("helvetica", "italic");
   doc.setFontSize(14);
   doc.setTextColor(80, 80, 80);
-  doc.text(collegeName, pageWidth / 2, 80, { align: "center" });
+  doc.text(collegeName, pageWidth / 2, 95, { align: "center" });
   
   // Certificate text (AI-generated text)
   const maxWidth = pageWidth - (margin * 6);
@@ -211,21 +219,21 @@ export const generatePdf = async (certificateData: CertificateData, certificateI
       .trim();
     
     const splitText = doc.splitTextToSize(cleanedText, maxWidth);
-    doc.text(splitText, pageWidth / 2, 90, { align: "center" });
+    doc.text(splitText, pageWidth / 2, 105, { align: "center" });
   } else {
     // Fallback certificate text if no AI-generated text
-    doc.text("This is to certify that the above named individual has successfully", pageWidth / 2, 90, { align: "center" });
-    doc.text(`participated in the ${activity} on ${format(activityDate, 'd MMMM yyyy')}.`, pageWidth / 2, 97, { align: "center" });
+    doc.text("This is to certify that the above named individual has successfully", pageWidth / 2, 105, { align: "center" });
+    doc.text(`participated in the ${activity} on ${format(activityDate, 'd MMMM yyyy')}.`, pageWidth / 2, 112, { align: "center" });
   }
   
   // Activity badge
   doc.setFillColor(240, 249, 255);
   doc.setDrawColor(147, 197, 253);
-  doc.roundedRect(pageWidth / 2 - 30, 110, 60, 15, 5, 5, 'FD');
+  doc.roundedRect(pageWidth / 2 - 30, 125, 60, 15, 5, 5, 'FD');
   doc.setFont("helvetica", "bold");
   doc.setTextColor(26, 86, 219);
   doc.setFontSize(11);
-  doc.text(activity, pageWidth / 2, 119, { align: "center" });
+  doc.text(activity, pageWidth / 2, 134, { align: "center" });
   
   // Get custom assets based on activity type
   const { signer, title } = getAssetsByActivityType(activity);
@@ -252,15 +260,30 @@ export const generatePdf = async (certificateData: CertificateData, certificateI
   doc.setFontSize(10);
   doc.text(title, pageWidth - 90, 165, { align: "center" });
   
-  // QR Code - positioned at bottom left with improved position
+  // Add institution information at the bottom left
+  doc.setFontSize(8);
+  doc.setTextColor(80, 80, 80);
+  doc.setFont("helvetica", "bold");
+  doc.text("CERTIGEN", margin + 5, pageHeight - margin - 25);
+  doc.setFont("helvetica", "normal");
+  doc.text("Learn and Grow", margin + 5, pageHeight - margin - 20);
+  doc.text("Kolkata, West Bengal, India", margin + 5, pageHeight - margin - 15);
+  doc.text("certigen.official@gmail.com", margin + 5, pageHeight - margin - 10);
+  doc.text("https://certigen.vercel.app", margin + 5, pageHeight - margin - 5);
+  
+  // QR Code - positioned at bottom right with "Scan to Verify" text
   if (qrCodeDataUrl) {
-    doc.addImage(qrCodeDataUrl, 'PNG', margin + 5, pageHeight - margin - 25, 20, 20);
+    doc.addImage(qrCodeDataUrl, 'PNG', pageWidth - margin - 30, pageHeight - margin - 35, 25, 25);
+    doc.setFontSize(8);
+    doc.setTextColor(26, 86, 219);
+    doc.setFont("helvetica", "bold");
+    doc.text("📱 Scan to Verify", pageWidth - margin - 18, pageHeight - margin - 5);
   }
   
   // Add "Online Verified Certificate" text at bottom right
   doc.setFontSize(8);
   doc.setTextColor(26, 86, 219);
-  doc.text("Online Verified Certificate", pageWidth - margin - 20, pageHeight - margin - 5, { align: "center" });
+  doc.text("Online Verified Certificate", pageWidth - margin - 60, pageHeight - margin - 5);
   
   // Footer
   doc.setFontSize(8);

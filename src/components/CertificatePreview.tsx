@@ -106,6 +106,10 @@ export default function CertificatePreview({
         return "border-certigen-gold bg-certigen-cream";
     }
   };
+  
+  // Generate a QR code URL for preview
+  const verifyQrUrl = `https://certigen.vercel.app/verify?cert_id=${certificateId}`;
+  
   return <div className={cn("certificate-container relative border-8 rounded-lg p-8 shadow-lg", getTemplateStyles(), "print:border-4 certificate-print-area", className)}>
       <div className="flex flex-col items-center text-center">
         {/* Certificate ID and Issue Date - Top-right corner */}
@@ -120,8 +124,13 @@ export default function CertificatePreview({
           </div>
         </div>
         
+        {/* Institution Logo */}
+        <div className="mb-4 mt-2">
+          <img src="/lovable-uploads/5428d286-91c0-4ac3-b06d-eb661c1ca0be.png" alt="CertiGen Logo" className="h-20 w-auto" />
+        </div>
+        
         {/* Certificate Header with enhanced styling */}
-        <div className="flex flex-col items-center mb-6 mt-6">
+        <div className="flex flex-col items-center mb-6">
           <h1 className="text-2xl md:text-3xl font-bold mb-1 text-certigen-navy">{titles.certificate}</h1>
           <h2 className="text-xl md:text-2xl font-semibold mb-1 text-certigen-navy">{titles.ofAchievement}</h2>
           <div className="w-24 h-1 bg-certigen-gold mb-4"></div>
@@ -174,10 +183,21 @@ export default function CertificatePreview({
           </div>
         </div>
         
-        {/* Bottom Section with QR Code - Fixed positioning */}
-        <div className="absolute bottom-10 left-6 flex items-start">
-          {/* QR Code */}
-          
+        {/* Institution info at bottom-left */}
+        <div className="absolute bottom-10 left-6">
+          <div className="text-xs text-gray-600">
+            <p className="font-semibold">CERTIGEN</p>
+            <p>Learn and Grow</p>
+            <p>Kolkata, West Bengal, India</p>
+            <p>certigen.official@gmail.com</p>
+            <p>https://certigen.vercel.app</p>
+          </div>
+        </div>
+        
+        {/* QR Code for verification */}
+        <div className="absolute bottom-10 right-6 flex flex-col items-center">
+          <QrCode className="h-16 w-16 mb-1" />
+          <p className="text-xs text-certigen-blue font-medium">📱 Scan to Verify</p>
         </div>
         
         {/* Online Verified Certificate text at bottom-right */}

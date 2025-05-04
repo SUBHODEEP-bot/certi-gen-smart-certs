@@ -157,11 +157,20 @@ const Generator = () => {
       <NavBar />
       <main className="container mx-auto px-4 py-8 md:py-12">
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-3xl md:text-4xl font-bold text-certigen-navy mb-2">Generate Your Certificate</h1>
-          <p className="text-lg text-gray-600 mb-8">
-            Fill out the form below to create your professional certificate instantly.
-            Only ₹2 per certificate.
-          </p>
+          <div className="flex items-center justify-center mb-8">
+            <img 
+              src="/lovable-uploads/5428d286-91c0-4ac3-b06d-eb661c1ca0be.png" 
+              alt="CertiGen Logo" 
+              className="h-16 mr-3"
+            />
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-certigen-navy">Generate Your Certificate</h1>
+              <p className="text-lg text-gray-600">
+                Fill out the form below to create your professional certificate instantly.
+                Only ₹2 per certificate.
+              </p>
+            </div>
+          </div>
           
           {!generatedCertificate ? (
             <CertificateForm onSubmit={handleSubmit} isGenerating={isGenerating} />
