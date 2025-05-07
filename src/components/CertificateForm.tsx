@@ -92,7 +92,6 @@ const activityOptions = {
     "Internship"
   ],
   "Community & Service": [
-    "Rural Reporting",
     "Tree Plantation and Up-keeping (per tree)",
     "Collection of Fund/Materials for Relief Camp",
     "Relief Work Team",
@@ -129,7 +128,8 @@ const activityOptions = {
   "Others": [
     "Activities in Professional Society",
     "Volunteer Work",
-    "Innovation"
+    "Innovation",
+    "Rural Reporting"
   ]
 };
 
