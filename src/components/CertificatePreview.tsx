@@ -44,49 +44,61 @@ export default function CertificatePreview({
       signer: "ASHOK KUMAR GHOSH",
       title: "Program Director"
     };
-    switch (activityType.toLowerCase()) {
-      case 'internship':
-        return {
-          signature: "/ananya_signature.png",
-          signer: "D.R. KUHELI MONDAL",
-          title: "Internship Director"
-        };
-      case 'webinar':
-      case 'online course':
-      case 'workshop':
-        return {
-          signature: "/priya_signature.png",
-          signer: "D.R. DIPAK KUMAR MONDAL",
-          title: "Course Director"
-        };
-      case 'hackathon':
-        return {
-          signature: "/ramesh_signature.png",
-          signer: "DILIP KUMAR GHOSH",
-          title: "Hackathon Director"
-        };
-      case 'volunteering':
-      case 'volunteer work':
-        return {
-          signature: "/volunteer_signature.png",
-          signer: "SOURAV YADAV",
-          title: "Volunteer Program Director"
-        };
-      case 'project':
-      case 'innovation':
-        return {
-          signature: "/project_signature.png",
-          signer: "ANINDITA BHATTACHARYA",
-          title: "Innovation Lead"
-        };
-      default:
-        return {
-          signature: "/priya_signature.png",
-          signer: "ASHOK KUMAR GHOSH",
-          title: "Program Director"
-        };
+    
+    // Extract main activity category by looking at the first part of the activity string
+    const activityLower = activityType.toLowerCase();
+    
+    if (activityLower.includes("mooc") || activityLower.includes("course") || activityLower.includes("workshop") || activityLower.includes("webinar")) {
+      return {
+        signature: "/priya_signature.png",
+        signer: "D.R. DIPAK KUMAR MONDAL",
+        title: "Course Director"
+      };
+    } else if (activityLower.includes("hackathon") || activityLower.includes("tech fest") || activityLower.includes("innovation")) {
+      return {
+        signature: "/ramesh_signature.png",
+        signer: "DILIP KUMAR GHOSH",
+        title: "Hackathon Director"
+      };
+    } else if (activityLower.includes("intern")) {
+      return {
+        signature: "/ananya_signature.png",
+        signer: "D.R. KUHELI MONDAL",
+        title: "Internship Director"
+      };
+    } else if (activityLower.includes("volunteer") || activityLower.includes("community") || activityLower.includes("relief") || activityLower.includes("tree plantation") || activityLower.includes("blood donation")) {
+      return {
+        signature: "/volunteer_signature.png",
+        signer: "SOURAV YADAV",
+        title: "Volunteer Program Director"
+      };
+    } else if (activityLower.includes("project") || activityLower.includes("publication") || activityLower.includes("research")) {
+      return {
+        signature: "/project_signature.png",
+        signer: "ANINDITA BHATTACHARYA",
+        title: "Innovation Lead"
+      };
+    } else if (activityLower.includes("sport") || activityLower.includes("game") || activityLower.includes("trekking") || activityLower.includes("yoga")) {
+      return {
+        signature: "/project_signature.png",
+        signer: "RAJAT GHOSH",
+        title: "Sports Director"
+      };
+    } else if (activityLower.includes("entrepreneur")) {
+      return {
+        signature: "/project_signature.png",
+        signer: "AMIT SINGH",
+        title: "Entrepreneurship Director"
+      };
+    } else {
+      return {
+        signature: "/priya_signature.png",
+        signer: "ASHOK KUMAR GHOSH",
+        title: "Program Director"
+      };
     }
   };
+  
   const {
     signature,
     signer,
@@ -195,7 +207,7 @@ export default function CertificatePreview({
           </div>
         </div>
         
-        {/* QR Code for verification - IMPROVED text formatting */}
+        {/* QR Code for verification - with fixed text formatting */}
         <div className="absolute bottom-10 right-6 flex flex-col items-center w-24">
           <QrCode className="h-16 w-16 mb-1" />
           <div className="text-center w-full">

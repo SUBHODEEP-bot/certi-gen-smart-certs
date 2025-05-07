@@ -22,7 +22,9 @@ import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -71,15 +73,65 @@ interface CertificateFormProps {
   isGenerating: boolean;
 }
 
-const activityOptions = [
-  "Workshop", 
-  "Hackathon", 
-  "Webinar", 
-  "Online Course", 
-  "Volunteer Work", 
-  "Innovation", 
-  "Internship"
-];
+// Updated activity options based on the provided image
+const activityOptions = {
+  "MOOC & Courses": [
+    "MOOCs (SWAYAM/NPTEL/Spoken Tutorial) - 12 weeks",
+    "MOOCs (SWAYAM/NPTEL/Spoken Tutorial) - 8 weeks",
+    "MOOCs (SWAYAM/NPTEL/Spoken Tutorial) - 4 weeks",
+    "MOOCs (SWAYAM/NPTEL/Spoken Tutorial) - 2 weeks",
+    "Online Course",
+    "Workshop"
+  ],
+  "Events & Participation": [
+    "Tech Fest/Fest - Organizer",
+    "Tech Fest/Fest - Participant",
+    "Teachers Day/Fresher's Welcome",
+    "Webinar",
+    "Hackathon",
+    "Internship"
+  ],
+  "Community & Service": [
+    "Rural Reporting",
+    "Tree Plantation and Up-keeping (per tree)",
+    "Collection of Fund/Materials for Relief Camp",
+    "Relief Work Team",
+    "Blood Donation",
+    "Blood Donation Camp Organization",
+    "Community Service",
+    "Caring for Senior Citizens/Underprivileged"
+  ],
+  "Academic & Innovation": [
+    "Debate/Group Discussion Participation",
+    "Tech Quiz/Seminar/Painting",
+    "Publication in News Paper/Magazine",
+    "Research Publication",
+    "Innovative Projects",
+    "Project",
+    "Relevant Industry Visit & Report"
+  ],
+  "Sports & Activities": [
+    "Sports/Games - Personal Level",
+    "Sports/Games - College Level",
+    "Sports/Games - University Level",
+    "Sports/Games - District Level",
+    "Sports/Games - State Level",
+    "Sports/Games - National Level",
+    "Adventure Sports/Trekking/Yoga Camp"
+  ],
+  "Entrepreneurship": [
+    "Organize Entrepreneurship Programmes",
+    "Entrepreneurship Workshop Participation",
+    "Video Film Making on Entrepreneurship",
+    "Business Plan Submission",
+    "Work for Start-up/as Entrepreneur"
+  ],
+  "Others": [
+    "Activities in Professional Society",
+    "Volunteer Work",
+    "Innovation"
+  ]
+};
 
 export default function CertificateForm({ onSubmit, isGenerating }: CertificateFormProps) {
   const [previewData, setPreviewData] = useState<CertificateFormValues | null>(null);
@@ -252,11 +304,16 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
                           <SelectValue placeholder="Select an activity" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
-                        {activityOptions.map((activity) => (
-                          <SelectItem key={activity} value={activity}>
-                            {activity}
-                          </SelectItem>
+                      <SelectContent className="max-h-80">
+                        {Object.entries(activityOptions).map(([category, activities]) => (
+                          <SelectGroup key={category}>
+                            <SelectLabel>{category}</SelectLabel>
+                            {activities.map((activity) => (
+                              <SelectItem key={activity} value={activity}>
+                                {activity}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
                         ))}
                       </SelectContent>
                     </Select>
@@ -450,16 +507,6 @@ export default function CertificateForm({ onSubmit, isGenerating }: CertificateF
       <div className="flex-1">
         <CertificatePreview certificateData={previewData} />
       </div>
-      
-      {/* Payment Modal - kept for future integration */}
-      {/* 
-      <PaymentModal 
-        isOpen={showPaymentModal} 
-        onClose={() => setShowPaymentModal(false)}
-        onPaymentSuccess={handlePaymentSuccess}
-        amount={2}
-      />
-      */}
     </div>
   );
 }
