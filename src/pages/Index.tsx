@@ -19,7 +19,9 @@ const Index = () => {
           </p>
         </div>
         <HeroSection />
-        <MarPointsSection />
+        <div id="mar-points">
+          <MarPointsSection />
+        </div>
         <FeaturesSection />
         <PricingSection />
         <TestimonialSection />

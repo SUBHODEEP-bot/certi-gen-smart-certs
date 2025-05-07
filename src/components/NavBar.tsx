@@ -8,14 +8,25 @@ export default function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
-  // Handle smooth scroll to MAR points section
+  // Handle smooth scroll to MAR points section with improved reliability
   const scrollToMarPoints = (e: React.MouseEvent) => {
     e.preventDefault();
-    const marPointsSection = document.getElementById('mar-points');
-    if (marPointsSection) {
-      marPointsSection.scrollIntoView({ behavior: 'smooth' });
-    }
+    
+    // Close menu if open
     setIsMenuOpen(false);
+    
+    // Use setTimeout to ensure the scroll happens after any route changes
+    setTimeout(() => {
+      const marPointsSection = document.getElementById('mar-points');
+      if (marPointsSection) {
+        marPointsSection.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        // If we're not on homepage, navigate to homepage first then scroll
+        if (location.pathname !== '/') {
+          window.location.href = '/#mar-points';
+        }
+      }
+    }, 100);
   };
 
   // Make sure all links work correctly
