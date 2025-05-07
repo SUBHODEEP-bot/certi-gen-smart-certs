@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Award, Code, GraduationCap, BookOpen, Users, Star, FileText, TreeDeciduous, Heart, Medal, Building, Pen } from 'lucide-react';
@@ -128,7 +129,7 @@ export default function MarPointsSection() {
   ];
 
   return (
-    <div className="py-16 bg-gray-50 gear-pattern">
+    <div id="mar-points" className="py-16 bg-gray-50 gear-pattern">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-certigen-navy mb-4">Earn MAR Points with Certificates</h2>

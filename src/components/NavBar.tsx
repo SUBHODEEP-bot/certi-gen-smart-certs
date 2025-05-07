@@ -8,6 +8,16 @@ export default function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
+  // Handle smooth scroll to MAR points section
+  const scrollToMarPoints = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const marPointsSection = document.getElementById('mar-points');
+    if (marPointsSection) {
+      marPointsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+    setIsMenuOpen(false);
+  };
+
   // Make sure all links work correctly
   const LinkComponent = ({ to, className, children, onClick }: { 
     to: string; 
@@ -61,7 +71,7 @@ export default function NavBar() {
           <LinkComponent to="/verify" className="text-gray-700 hover:text-certigen-blue transition-colors">
             Verify Certificate
           </LinkComponent>
-          <a href="#mar-points" className="text-gray-700 hover:text-certigen-blue transition-colors">
+          <a href="#mar-points" className="text-gray-700 hover:text-certigen-blue transition-colors" onClick={scrollToMarPoints}>
             MAR Points
           </a>
         </nav>
@@ -107,7 +117,7 @@ export default function NavBar() {
           <a 
             href="#mar-points" 
             className="text-gray-700 hover:text-certigen-blue py-2 px-3 rounded-md hover:bg-blue-50"
-            onClick={() => setIsMenuOpen(false)}
+            onClick={scrollToMarPoints}
           >
             MAR Points
           </a>

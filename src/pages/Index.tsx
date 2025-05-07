@@ -13,10 +13,13 @@ const Index = () => {
     <div className="flex flex-col min-h-screen">
       <NavBar />
       <main>
-        <HeroSection />
-        <div id="mar-points">
-          <MarPointsSection />
+        <div className="bg-certigen-blue text-white text-center py-3 shadow-md">
+          <p className="text-sm md:text-base font-medium">
+            Make your certificate without logging in or registering — quick and easy!
+          </p>
         </div>
+        <HeroSection />
+        <MarPointsSection />
         <FeaturesSection />
         <PricingSection />
         <TestimonialSection />
