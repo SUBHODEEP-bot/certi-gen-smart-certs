@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { z } from "zod";
 import { format } from "date-fns";
@@ -73,61 +72,34 @@ interface CertificateFormProps {
   isGenerating: boolean;
 }
 
-// Updated activity options based on the provided image
+// Simplified activity options with only the requested additions
 const activityOptions = {
-  "MOOC & Courses": [
-    "MOOCs (SWAYAM/NPTEL/Spoken Tutorial) - 12 weeks",
-    "MOOCs (SWAYAM/NPTEL/Spoken Tutorial) - 8 weeks",
-    "MOOCs (SWAYAM/NPTEL/Spoken Tutorial) - 4 weeks",
-    "MOOCs (SWAYAM/NPTEL/Spoken Tutorial) - 2 weeks",
-    "Online Course",
-    "Workshop"
-  ],
-  "Events & Participation": [
-    "Tech Fest/Fest - Organizer",
-    "Tech Fest/Fest - Participant",
-    "Teachers Day/Fresher's Welcome",
+  "Popular Activities": [
+    "Workshop",
     "Webinar",
     "Hackathon",
-    "Internship"
+    "Internship",
+    "Project",
+    "Online Course"
   ],
   "Community & Service": [
     "Tree Plantation and Up-keeping (per tree)",
     "Collection of Fund/Materials for Relief Camp",
-    "Relief Work Team",
     "Blood Donation",
-    "Blood Donation Camp Organization",
     "Community Service",
-    "Caring for Senior Citizens/Underprivileged"
+    "Volunteer Work"
   ],
   "Academic & Innovation": [
-    "Debate/Group Discussion Participation",
-    "Tech Quiz/Seminar/Painting",
-    "Publication in News Paper/Magazine",
-    "Research Publication",
+    "Tech Quiz",
     "Innovative Projects",
-    "Project",
-    "Relevant Industry Visit & Report"
+    "Research Publication"
   ],
   "Sports & Activities": [
-    "Sports/Games - Personal Level",
-    "Sports/Games - College Level",
-    "Sports/Games - University Level",
-    "Sports/Games - District Level",
-    "Sports/Games - State Level",
-    "Sports/Games - National Level",
-    "Adventure Sports/Trekking/Yoga Camp"
-  ],
-  "Entrepreneurship": [
-    "Organize Entrepreneurship Programmes",
-    "Entrepreneurship Workshop Participation",
-    "Video Film Making on Entrepreneurship",
-    "Business Plan Submission",
-    "Work for Start-up/as Entrepreneur"
+    "Sports/Games",
+    "Yoga Camp"
   ],
   "Others": [
     "Activities in Professional Society",
-    "Volunteer Work",
     "Innovation",
     "Rural Reporting"
   ]
