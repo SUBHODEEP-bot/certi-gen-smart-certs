@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Award, Code, GraduationCap, BookOpen, Users, Star, FileText, Tree, Heart, Medal, Building, Pen } from 'lucide-react';
+import { Award, Code, GraduationCap, BookOpen, Users, Star, FileText, TreeDeciduous, Heart, Medal, Building, Pen } from 'lucide-react';
 
 interface PointCardProps {
   title: string;
@@ -63,7 +62,7 @@ export default function MarPointsSection() {
       subtitle: "Per tree",
       points: 1,
       maxPoints: 10,
-      icon: <Tree className="h-6 w-6 text-green-600" />,
+      icon: <TreeDeciduous className="h-6 w-6 text-green-600" />,
       color: "#059669"
     },
     {
