@@ -1,9 +1,10 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { cn } from "@/lib/utils";
 import { QrCode } from 'lucide-react';
 import { getCertificateTitle } from '@/utils/certificate';
+import QRCode from 'qrcode';
+
 interface CertificateData {
   fullName?: string;
   activity?: string;
@@ -13,11 +14,13 @@ interface CertificateData {
   language?: 'english' | 'bengali' | 'hindi';
   template?: 'classic' | 'modern' | 'elegant' | 'professional';
 }
+
 interface CertificatePreviewProps {
   certificateData: CertificateData | null;
   certificateId?: string;
   className?: string;
 }
+
 export default function CertificatePreview({
   certificateData,
   certificateId = "PREVIEW",
@@ -30,12 +33,30 @@ export default function CertificatePreview({
   const date = certificateData?.activityDate ? format(certificateData.activityDate, "d MMMM yyyy") : "Date of Activity";
   const language = certificateData?.language || 'english';
   const template = certificateData?.template || 'classic';
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
 
   // Clean certificate text from unwanted phrases
   const certificateText = certificateData?.certificateText ? certificateData.certificateText.replace(/\b\d+\s*MAR\s*Points\b/gi, '').replace(/This achievement is worth.*?points\./gi, '').replace(/meeting all the necessary requirements as per academic standards recognized by MAKAUT\./gi, '').trim() : "Certificate description will appear here after generation.";
 
   // Get translated title
   const titles = getCertificateTitle(language);
+
+  useEffect(() => {
+    // Generate QR code for the certificate ID
+    const generateQR = async () => {
+      if (certificateId) {
+        try {
+          const verifyUrl = `https://scertigen.netlify.app/verify?cert_id=${certificateId}`;
+          const qrCode = await QRCode.toDataURL(verifyUrl);
+          setQrCodeDataUrl(qrCode);
+        } catch (error) {
+          console.error('Error generating QR code:', error);
+        }
+      }
+    };
+    
+    generateQR();
+  }, [certificateId]);
 
   // Choose stamp and signature based on activity type
   const getStampAndSignature = (activityType?: string) => {
@@ -119,9 +140,6 @@ export default function CertificatePreview({
         return "border-certigen-gold bg-certigen-cream";
     }
   };
-  
-  // Generate a QR code URL for preview
-  const verifyQrUrl = `https://scertigen.netlify.app/verify?cert_id=${certificateId}`;
   
   return <div className={cn("certificate-container relative border-8 rounded-lg p-8 shadow-lg", getTemplateStyles(), "print:border-4 certificate-print-area", className)}>
       <div className="flex flex-col items-center text-center">
@@ -207,9 +225,13 @@ export default function CertificatePreview({
           </div>
         </div>
         
-        {/* QR Code for verification - with fixed text formatting */}
+        {/* QR Code for verification - with actual QR code */}
         <div className="absolute bottom-10 right-6 flex flex-col items-center w-24">
-          <QrCode className="h-16 w-16 mb-1" />
+          {qrCodeDataUrl ? (
+            <img src={qrCodeDataUrl} alt="Verification QR Code" className="h-16 w-16 mb-1" />
+          ) : (
+            <QrCode className="h-16 w-16 mb-1" />
+          )}
           <div className="text-center w-full">
             <p className="text-[10px] leading-tight text-certigen-blue font-medium">
               Online Verified Certificate
