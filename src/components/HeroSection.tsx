@@ -60,7 +60,7 @@ export default function HeroSection() {
           <div className="lg:w-1/2">
             <div className="relative">
               {/* Decorative elements */}
-              <div className="absolute -top-6 -left-16 w-14 h-14 bg-certigen-gold rounded-lg opacity-20 floating"></div>
+              <div className="absolute -top-6 -left-16 w-14 h-14 rounded-lg opacity-20 floating bg-amber-950"></div>
               <div className="absolute top-10 -right-8 w-20 h-20 border-4 border-certigen-blue rounded-full opacity-20 spin-slow"></div>
               <div className="absolute bottom-10 -left-10 w-16 h-16 bg-certigen-lightblue rounded-lg opacity-20 floating" style={{
               animationDelay: '1s'
