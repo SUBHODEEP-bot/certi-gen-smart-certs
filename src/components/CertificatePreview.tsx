@@ -121,7 +121,7 @@ export default function CertificatePreview({
   };
   
   // Generate a QR code URL for preview
-  const verifyQrUrl = `https://certigen.vercel.app/verify?cert_id=${certificateId}`;
+  const verifyQrUrl = `https://scertigen.netlify.app/verify?cert_id=${certificateId}`;
   
   return <div className={cn("certificate-container relative border-8 rounded-lg p-8 shadow-lg", getTemplateStyles(), "print:border-4 certificate-print-area", className)}>
       <div className="flex flex-col items-center text-center">
@@ -203,7 +203,7 @@ export default function CertificatePreview({
             <p>Learn and Grow</p>
             <p>Kolkata, West Bengal, India</p>
             <p>certigen.official@gmail.com</p>
-            <p>https://certigen.vercel.app</p>
+            <p>https://scertigen.netlify.app</p>
           </div>
         </div>
         

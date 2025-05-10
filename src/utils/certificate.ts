@@ -1,3 +1,4 @@
+
 import { jsPDF } from 'jspdf';
 import { format } from 'date-fns';
 import QRCode from 'qrcode';
@@ -124,7 +125,7 @@ export const getCertificateTitle = (language: SupportedLanguage = 'english') => 
 // Generate QR Code for certificate verification
 export const generateQRCode = async (certificateId: string): Promise<string> => {
   try {
-    const verifyUrl = `https://certigen.vercel.app/verify?cert_id=${certificateId}`;
+    const verifyUrl = `https://scertigen.netlify.app/verify?cert_id=${certificateId}`;
     return await QRCode.toDataURL(verifyUrl);
   } catch (error) {
     console.error("Error generating QR code:", error);
@@ -268,7 +269,7 @@ export const generatePdf = async (certificateData: CertificateData, certificateI
   doc.text("Learn and Grow", margin + 5, pageHeight - margin - 20);
   doc.text("Kolkata, West Bengal, India", margin + 5, pageHeight - margin - 15);
   doc.text("certigen.official@gmail.com", margin + 5, pageHeight - margin - 10);
-  doc.text("https://certigen.vercel.app", margin + 5, pageHeight - margin - 5);
+  doc.text("https://scertigen.netlify.app", margin + 5, pageHeight - margin - 5);
   
   // QR Code - positioned at bottom right with improved text alignment
   if (qrCodeDataUrl) {
