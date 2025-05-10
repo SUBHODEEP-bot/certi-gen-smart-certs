@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import { Input } from '@/components/ui/input';
@@ -7,11 +7,46 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { BadgeCheck, CircleX } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 
 const Verify = () => {
   const [certificateId, setCertificateId] = useState('');
   const [verificationStatus, setVerificationStatus] = useState<'idle' | 'verifying' | 'valid' | 'invalid'>('idle');
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+
+  // Extract certificate ID from URL when component mounts
+  useEffect(() => {
+    const certId = searchParams.get('cert_id');
+    if (certId) {
+      setCertificateId(certId);
+      // Auto-verify when certificate ID is present in URL
+      verifyWithDelay(certId);
+    }
+  }, [searchParams]);
+
+  const verifyWithDelay = (id: string) => {
+    setVerificationStatus('verifying');
+    
+    // Simulate verification process with timeout
+    setTimeout(() => {
+      // In a real app, this would check against a database
+      // For demo purposes, we'll consider certificates starting with "CERT-" as valid
+      if (id.startsWith('CERT-') && id.length === 13) {
+        setVerificationStatus('valid');
+        toast({
+          title: "Certificate Verified",
+          description: "This certificate is authentic and has been verified in our system."
+        });
+      } else {
+        setVerificationStatus('invalid');
+        toast({
+          title: "Invalid Certificate",
+          description: "This certificate ID was not found in our system or is invalid."
+        });
+      }
+    }, 1500);
+  };
 
   const handleVerify = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,18 +60,7 @@ const Verify = () => {
       return;
     }
     
-    setVerificationStatus('verifying');
-    
-    // Simulate verification process with timeout
-    setTimeout(() => {
-      // In a real app, this would check against a database
-      // For demo purposes, we'll consider certificates starting with "CERT-" as valid
-      if (certificateId.startsWith('CERT-') && certificateId.length === 13) {
-        setVerificationStatus('valid');
-      } else {
-        setVerificationStatus('invalid');
-      }
-    }, 1500);
+    verifyWithDelay(certificateId);
   };
 
   return (
