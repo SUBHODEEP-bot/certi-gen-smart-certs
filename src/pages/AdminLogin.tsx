@@ -16,6 +16,7 @@ const AdminLogin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Admin credentials - in a real app, these would be stored server-side
   const ADMIN_USERNAME = "SUBHODEEP PAL";
   const ADMIN_PASSWORD = "Pal@2005";
   const MAX_ATTEMPTS = 5;
@@ -26,8 +27,12 @@ const AdminLogin = () => {
     
     setTimeout(() => {
       if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-        // Set admin session
-        localStorage.setItem('certigenAdmin', 'true');
+        // Use sessionStorage for admin login status (persists across tabs but clears when browser closes)
+        sessionStorage.setItem('certigenAdmin', 'true');
+        
+        // Also set in localStorage for longer persistence if needed
+        localStorage.setItem('certigenAdminAuth', 'true');
+        
         navigate('/admin/dashboard');
         
         toast({

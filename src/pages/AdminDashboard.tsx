@@ -15,10 +15,12 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Check admin authentication
+  // Check admin authentication from both sessionStorage and localStorage
   useEffect(() => {
-    const isAdmin = localStorage.getItem('certigenAdmin') === 'true';
-    if (!isAdmin) {
+    const isAdminSession = sessionStorage.getItem('certigenAdmin') === 'true';
+    const isAdminLocal = localStorage.getItem('certigenAdminAuth') === 'true';
+    
+    if (!isAdminSession && !isAdminLocal) {
       navigate('/admin');
       toast({
         title: "Access Denied",
@@ -29,7 +31,9 @@ const AdminDashboard = () => {
   }, [navigate, toast]);
 
   const handleLogout = () => {
-    localStorage.removeItem('certigenAdmin');
+    // Clear admin authentication from both storage methods
+    sessionStorage.removeItem('certigenAdmin');
+    localStorage.removeItem('certigenAdminAuth');
     navigate('/admin');
     toast({
       title: "Logged Out",

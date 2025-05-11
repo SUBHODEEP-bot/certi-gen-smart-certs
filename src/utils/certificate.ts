@@ -1,4 +1,3 @@
-
 import { jsPDF } from 'jspdf';
 import { format } from 'date-fns';
 import QRCode from 'qrcode';
@@ -355,11 +354,14 @@ export interface AnalyticsData {
   dailyStats: Record<string, number>;
 }
 
-// Mock function to save generated certificate data to local storage (for admin analytics)
+// Save certificate data to a shared key in localStorage that all users contribute to
 export const saveGeneratedCertificateData = (certificateData: CertificateData) => {
   try {
-    // Get existing data
-    const existingDataStr = localStorage.getItem('certigenAdminData');
+    // Generate a unique certificate ID
+    const certId = generateCertificateId();
+    
+    // Get existing data using the GLOBAL key
+    const existingDataStr = localStorage.getItem('certigenGlobalCertificates');
     const existingData = existingDataStr ? JSON.parse(existingDataStr) : {
       certificates: [],
       totalCertificates: 0,
@@ -371,9 +373,10 @@ export const saveGeneratedCertificateData = (certificateData: CertificateData) =
     // Update data
     const today = format(new Date(), 'yyyy-MM-dd');
     
-    // Update certificates array
+    // Add the certificate with its ID
     existingData.certificates.push({
       ...certificateData,
+      id: certId,
       generatedAt: new Date().toISOString(),
       price: 2
     });
@@ -389,19 +392,59 @@ export const saveGeneratedCertificateData = (certificateData: CertificateData) =
     // Update daily stats
     existingData.dailyStats[today] = (existingData.dailyStats[today] || 0) + 1;
     
-    // Save back to storage
+    // Save to global storage
+    localStorage.setItem('certigenGlobalCertificates', JSON.stringify(existingData));
+    
+    // Also save a copy to user-specific storage (for user history)
     localStorage.setItem('certigenAdminData', JSON.stringify(existingData));
     
-    return true;
+    return certId;
   } catch (error) {
     console.error("Error saving certificate data:", error);
-    return false;
+    return null;
   }
 };
 
-// Get admin analytics data
+// Get all generated certificates for admin view
+export const getAllGeneratedCertificates = () => {
+  try {
+    // Try to get from global storage first (this contains ALL certificates)
+    const globalDataStr = localStorage.getItem('certigenGlobalCertificates');
+    
+    if (globalDataStr) {
+      const globalData = JSON.parse(globalDataStr);
+      return globalData.certificates || [];
+    }
+    
+    // Fall back to admin data if global doesn't exist yet
+    const dataStr = localStorage.getItem('certigenAdminData');
+    if (!dataStr) return [];
+    
+    const data = JSON.parse(dataStr);
+    return data.certificates || [];
+  } catch (error) {
+    console.error("Error retrieving certificates:", error);
+    return [];
+  }
+};
+
+// Get admin analytics data - also update this to use global data
 export const getAnalyticsData = (): AnalyticsData => {
   try {
+    // Try global data first
+    const globalDataStr = localStorage.getItem('certigenGlobalCertificates');
+    
+    if (globalDataStr) {
+      const globalData = JSON.parse(globalDataStr);
+      return {
+        totalCertificates: globalData.totalCertificates || 0,
+        revenue: globalData.revenue || 0,
+        topActivities: globalData.topActivities || {},
+        dailyStats: globalData.dailyStats || {}
+      };
+    }
+    
+    // Fall back to admin data
     const dataStr = localStorage.getItem('certigenAdminData');
     if (!dataStr) {
       return {
@@ -427,18 +470,5 @@ export const getAnalyticsData = (): AnalyticsData => {
       topActivities: {},
       dailyStats: {}
     };
-  }
-};
-
-export const getAllGeneratedCertificates = () => {
-  try {
-    const dataStr = localStorage.getItem('certigenAdminData');
-    if (!dataStr) return [];
-    
-    const data = JSON.parse(dataStr);
-    return data.certificates || [];
-  } catch (error) {
-    console.error("Error retrieving certificates:", error);
-    return [];
   }
 };

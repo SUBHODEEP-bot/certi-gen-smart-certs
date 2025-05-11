@@ -41,8 +41,14 @@ const AdminCertificateList = () => {
   const { toast } = useToast();
   
   useEffect(() => {
-    // Load certificates from local storage
+    // Load certificates from global storage
     const loadedCertificates = getAllGeneratedCertificates();
+    
+    // Sort by date (newest first)
+    loadedCertificates.sort((a: Certificate, b: Certificate) => {
+      return new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime();
+    });
+    
     setCertificates(loadedCertificates);
   }, []);
   
@@ -81,8 +87,8 @@ const AdminCertificateList = () => {
   
   const handleDelete = (index: number) => {
     try {
-      // Get current data
-      const data = JSON.parse(localStorage.getItem('certigenAdminData') || '{}');
+      // Get current global data
+      const data = JSON.parse(localStorage.getItem('certigenGlobalCertificates') || '{}');
       
       // Remove certificate at specified index
       if (data.certificates && data.certificates.length > index) {
@@ -92,7 +98,10 @@ const AdminCertificateList = () => {
         // Recalculate revenue
         data.revenue = data.certificates.reduce((sum: number, cert: any) => sum + (cert.price || 0), 0);
         
-        // Update storage
+        // Update global storage
+        localStorage.setItem('certigenGlobalCertificates', JSON.stringify(data));
+        
+        // Also update admin data to stay in sync
         localStorage.setItem('certigenAdminData', JSON.stringify(data));
         
         // Update state
