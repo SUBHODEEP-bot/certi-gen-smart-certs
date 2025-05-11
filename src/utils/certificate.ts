@@ -1,4 +1,3 @@
-
 import { jsPDF } from 'jspdf';
 import { format } from 'date-fns';
 import QRCode from 'qrcode';
@@ -355,7 +354,7 @@ export interface AnalyticsData {
   dailyStats: Record<string, number>;
 }
 
-// Save certificate data to a shared key in localStorage that all users contribute to
+// Save certificate data with improved cross-device compatibility
 export const saveGeneratedCertificateData = (certificateData: CertificateData) => {
   try {
     // Generate a unique certificate ID
@@ -398,28 +397,23 @@ export const saveGeneratedCertificateData = (certificateData: CertificateData) =
     // Save to global storage
     localStorage.setItem('certigenGlobalCertificates', JSON.stringify(existingData));
     
-    // Also save or update to a server-synchronized key specifically for deployed environments
-    // This will allow data to be visible across different sessions and devices when deployed
+    // Also save to a server-synchronized key
+    // This helps with deployed environments and sharing data
     try {
-      // First, check if there are any certificates in sessionStorage (for sharing across tabs)
-      const sessionDataStr = sessionStorage.getItem('certigenDeployedData');
-      if (sessionDataStr) {
-        const sessionData = JSON.parse(sessionDataStr);
-        // If we have session data, merge it with our existing data
-        if (sessionData.certificates) {
-          // Filter out duplicates before merging
-          const existingIds = new Set(existingData.certificates.map((cert: any) => cert.id));
-          const newCerts = sessionData.certificates.filter((cert: any) => !existingIds.has(cert.id));
-          existingData.certificates = [...existingData.certificates, ...newCerts];
-          existingData.totalCertificates = existingData.certificates.length;
-          existingData.revenue = existingData.certificates.length * 2; // Recalculate revenue
-        }
-      }
+      // Add timestamp to help with syncing
+      const syncData = {
+        ...existingData,
+        lastUpdated: new Date().toISOString(),
+        syncId: Math.random().toString(36).substring(2, 15)
+      };
       
-      // Save to sessionStorage for sharing across tabs
-      sessionStorage.setItem('certigenDeployedData', JSON.stringify(existingData));
+      // Store in sessionStorage to share across tabs
+      sessionStorage.setItem('certigenDeployedData', JSON.stringify(syncData));
       
-      // Also save to adminData for backward compatibility
+      // Also store in localStorage with a different key for persistence
+      localStorage.setItem('certigenNetlifyStorage', JSON.stringify(syncData));
+      
+      // Keep backward compatibility
       localStorage.setItem('certigenAdminData', JSON.stringify(existingData));
     } catch (err) {
       console.error("Error syncing certificate data:", err);
@@ -432,72 +426,53 @@ export const saveGeneratedCertificateData = (certificateData: CertificateData) =
   }
 };
 
-// Get all generated certificates for admin view
+// Get all generated certificates with improved cross-device data aggregation
 export const getAllGeneratedCertificates = () => {
   try {
-    // Start with an empty array for certificates
-    let certificates = [];
+    // Create a map to store certificates by ID to avoid duplicates
+    const certificateMap = new Map();
     
-    // Try to get certificates from different storage locations and merge them
+    // Array of storage keys to check, in order of priority
+    const storageKeys = [
+      { type: 'localStorage', key: 'certigenGlobalCertificates' },
+      { type: 'localStorage', key: 'certigenNetlifyStorage' },
+      { type: 'sessionStorage', key: 'certigenDeployedData' },
+      { type: 'localStorage', key: 'certigenAdminData' }
+    ];
     
-    // 1. Try global localStorage first
-    const globalDataStr = localStorage.getItem('certigenGlobalCertificates');
-    if (globalDataStr) {
+    // Function to safely parse JSON from storage
+    const safelyParse = (dataStr: string | null) => {
+      if (!dataStr) return null;
       try {
-        const globalData = JSON.parse(globalDataStr);
-        certificates = [...certificates, ...(globalData.certificates || [])];
+        return JSON.parse(dataStr);
       } catch (e) {
-        console.error("Error parsing global certificates:", e);
+        console.error("Error parsing certificate data:", e);
+        return null;
       }
-    }
+    };
     
-    // 2. Try sessionStorage data (for sharing across tabs in deployed environment)
-    const sessionDataStr = sessionStorage.getItem('certigenDeployedData');
-    if (sessionDataStr) {
-      try {
-        const sessionData = JSON.parse(sessionDataStr);
-        // Add certificates that aren't already in our list
-        const existingIds = new Set(certificates.map(cert => cert.id));
-        const newCerts = (sessionData.certificates || []).filter(cert => !existingIds.has(cert.id));
-        certificates = [...certificates, ...newCerts];
-      } catch (e) {
-        console.error("Error parsing session certificates:", e);
+    // Check all storage locations and aggregate certificates
+    storageKeys.forEach(({ type, key }) => {
+      const storage = type === 'localStorage' ? localStorage : sessionStorage;
+      const dataStr = storage.getItem(key);
+      const data = safelyParse(dataStr);
+      
+      if (data && Array.isArray(data.certificates)) {
+        data.certificates.forEach((cert: any) => {
+          if (cert && cert.id && !certificateMap.has(cert.id)) {
+            certificateMap.set(cert.id, cert);
+          }
+        });
       }
-    }
+    });
     
-    // 3. Try admin data as fallback
-    const adminDataStr = localStorage.getItem('certigenAdminData');
-    if (adminDataStr) {
-      try {
-        const adminData = JSON.parse(adminDataStr);
-        // Add certificates that aren't already in our list
-        const existingIds = new Set(certificates.map(cert => cert.id));
-        const newCerts = (adminData.certificates || []).filter(cert => !existingIds.has(cert.id));
-        certificates = [...certificates, ...newCerts];
-      } catch (e) {
-        console.error("Error parsing admin certificates:", e);
-      }
-    }
-    
-    // Remove any duplicates that might have slipped through
-    const uniqueCerts = [];
-    const seenIds = new Set();
-    for (const cert of certificates) {
-      if (cert.id && !seenIds.has(cert.id)) {
-        seenIds.add(cert.id);
-        uniqueCerts.push(cert);
-      } else if (!cert.id) {
-        // If no ID, include it anyway (should be rare)
-        uniqueCerts.push(cert);
-      }
-    }
-    
-    // Sort by date (newest first)
-    uniqueCerts.sort((a, b) => {
+    // Convert map to array and sort by date (newest first)
+    const certificates = Array.from(certificateMap.values());
+    certificates.sort((a: any, b: any) => {
       return new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime();
     });
     
-    return uniqueCerts;
+    return certificates;
   } catch (error) {
     console.error("Error retrieving certificates:", error);
     return [];

@@ -28,6 +28,22 @@ const AdminDashboard = () => {
         variant: "destructive"
       });
     }
+    
+    // Force an immediate reload of certificate data for the admin
+    // This helps ensure all certificates are loaded from all storage locations
+    try {
+      // Trigger storage event to refresh data across tabs
+      const refreshEvent = new Event('adminRefresh');
+      window.dispatchEvent(refreshEvent);
+      
+      // Also sync up any data in sessionStorage to localStorage for persistence
+      const sessionDataStr = sessionStorage.getItem('certigenDeployedData');
+      if (sessionDataStr) {
+        localStorage.setItem('certigenNetlifyStorage', sessionDataStr);
+      }
+    } catch (err) {
+      console.error("Error syncing admin data:", err);
+    }
   }, [navigate, toast]);
 
   const handleLogout = () => {

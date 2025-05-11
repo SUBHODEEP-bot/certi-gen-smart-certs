@@ -39,31 +39,76 @@ const AdminCertificateList = () => {
   const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [pollingIntervalId, setPollingIntervalId] = useState<number | null>(null);
   const { toast } = useToast();
   
   const loadCertificates = () => {
-    // Load certificates from global storage
+    // Load certificates from all storage locations
     const loadedCertificates = getAllGeneratedCertificates();
     
-    // Sort by date (newest first) - though getAllGeneratedCertificates now does this already
-    loadedCertificates.sort((a: Certificate, b: Certificate) => {
-      return new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime();
-    });
+    // Check if we have new certificates
+    if (certificates.length !== loadedCertificates.length) {
+      setCertificates(loadedCertificates);
+      
+      if (certificates.length > 0 && loadedCertificates.length > certificates.length) {
+        toast({
+          title: "New Certificates Available",
+          description: `${loadedCertificates.length - certificates.length} new certificate(s) found.`
+        });
+      }
+    } else {
+      // Check if any certificates have changed
+      const hasChanges = loadedCertificates.some((cert, index) => 
+        index < certificates.length && cert.id !== certificates[index].id
+      );
+      
+      if (hasChanges) {
+        setCertificates(loadedCertificates);
+      }
+    }
+  };
+  
+  // Function to start regular polling for updates
+  const startPolling = () => {
+    if (pollingIntervalId) {
+      clearInterval(pollingIntervalId);
+    }
     
-    setCertificates(loadedCertificates);
+    // Check for updates every 15 seconds
+    const intervalId = window.setInterval(() => {
+      loadCertificates();
+    }, 15000);
+    
+    setPollingIntervalId(intervalId);
   };
   
   useEffect(() => {
     // Initial load
     loadCertificates();
     
-    // Set up interval to refresh certificates periodically (every 30 seconds)
-    const refreshInterval = setInterval(() => {
-      loadCertificates();
-    }, 30000);
+    // Start polling for updates
+    startPolling();
     
-    // Clean up interval on component unmount
-    return () => clearInterval(refreshInterval);
+    // Add a one-time storage event listener for cross-tab communication
+    const handleStorageChange = (event: StorageEvent) => {
+      if (
+        event.key === 'certigenGlobalCertificates' || 
+        event.key === 'certigenNetlifyStorage' || 
+        event.key === 'certigenDeployedData'
+      ) {
+        loadCertificates();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Clean up on component unmount
+    return () => {
+      if (pollingIntervalId) {
+        clearInterval(pollingIntervalId);
+      }
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
   
   const handlePreview = (certificate: Certificate) => {
@@ -113,43 +158,37 @@ const AdminCertificateList = () => {
       // Update state
       setCertificates(updatedCertificates);
       
+      // Function to update storage
+      const updateStorageData = (key: string, storageType: 'local' | 'session') => {
+        const storage = storageType === 'local' ? localStorage : sessionStorage;
+        const dataStr = storage.getItem(key);
+        if (dataStr) {
+          try {
+            const data = JSON.parse(dataStr);
+            if (data.certificates) {
+              data.certificates = data.certificates.filter((cert: any) => cert.id !== deletedCertId);
+              data.totalCertificates = data.certificates.length;
+              data.revenue = data.certificates.length * 2;
+              
+              // If it's a sync storage, update the lastUpdated field
+              if (key === 'certigenNetlifyStorage' || key === 'certigenDeployedData') {
+                data.lastUpdated = new Date().toISOString();
+                data.syncId = Math.random().toString(36).substring(2, 15);
+              }
+              
+              storage.setItem(key, JSON.stringify(data));
+            }
+          } catch (e) {
+            console.error(`Error updating ${key}:`, e);
+          }
+        }
+      };
+      
       // Update all storage locations
-      
-      // 1. Update global storage
-      const globalDataStr = localStorage.getItem('certigenGlobalCertificates');
-      if (globalDataStr) {
-        const globalData = JSON.parse(globalDataStr);
-        if (globalData.certificates) {
-          globalData.certificates = globalData.certificates.filter((cert: any) => cert.id !== deletedCertId);
-          globalData.totalCertificates = globalData.certificates.length;
-          globalData.revenue = globalData.certificates.length * 2;
-          localStorage.setItem('certigenGlobalCertificates', JSON.stringify(globalData));
-        }
-      }
-      
-      // 2. Update session storage
-      const sessionDataStr = sessionStorage.getItem('certigenDeployedData');
-      if (sessionDataStr) {
-        const sessionData = JSON.parse(sessionDataStr);
-        if (sessionData.certificates) {
-          sessionData.certificates = sessionData.certificates.filter((cert: any) => cert.id !== deletedCertId);
-          sessionData.totalCertificates = sessionData.certificates.length;
-          sessionData.revenue = sessionData.certificates.length * 2;
-          sessionStorage.setItem('certigenDeployedData', JSON.stringify(sessionData));
-        }
-      }
-      
-      // 3. Update admin data
-      const adminDataStr = localStorage.getItem('certigenAdminData');
-      if (adminDataStr) {
-        const adminData = JSON.parse(adminDataStr);
-        if (adminData.certificates) {
-          adminData.certificates = adminData.certificates.filter((cert: any) => cert.id !== deletedCertId);
-          adminData.totalCertificates = adminData.certificates.length;
-          adminData.revenue = adminData.certificates.length * 2;
-          localStorage.setItem('certigenAdminData', JSON.stringify(adminData));
-        }
-      }
+      updateStorageData('certigenGlobalCertificates', 'local');
+      updateStorageData('certigenNetlifyStorage', 'local');
+      updateStorageData('certigenDeployedData', 'session');
+      updateStorageData('certigenAdminData', 'local');
       
       toast({
         title: "Certificate Deleted",
@@ -167,6 +206,7 @@ const AdminCertificateList = () => {
   const handleRefresh = () => {
     setIsRefreshing(true);
     loadCertificates();
+    startPolling(); // Restart the polling on manual refresh
     
     toast({
       title: "Refreshed",
