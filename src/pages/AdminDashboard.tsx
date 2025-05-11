@@ -32,15 +32,42 @@ const AdminDashboard = () => {
     // Force an immediate reload of certificate data for the admin
     // This helps ensure all certificates are loaded from all storage locations
     try {
+      // Sync Netlify storage data with global storage data
+      const syncNetlifyData = () => {
+        try {
+          const netlifyDataStr = localStorage.getItem('certigenNetlifyDeployedData') || 
+                              sessionStorage.getItem('certigenNetlifyDeployedData') || 
+                              localStorage.getItem('certigenNetlifyStorage') || 
+                              sessionStorage.getItem('certigenDeployedData');
+                              
+          if (netlifyDataStr) {
+            // Update global storage with Netlify data
+            localStorage.setItem('certigenGlobalCertificates', netlifyDataStr);
+            
+            // Also update all other storage locations for consistency
+            localStorage.setItem('certigenNetlifyDeployedData', netlifyDataStr);
+            sessionStorage.setItem('certigenNetlifyDeployedData', netlifyDataStr);
+            localStorage.setItem('certigenNetlifyStorage', netlifyDataStr);
+            sessionStorage.setItem('certigenDeployedData', netlifyDataStr);
+          }
+          
+          // Also check for global data and sync it back to Netlify storage
+          const globalDataStr = localStorage.getItem('certigenGlobalCertificates');
+          if (globalDataStr) {
+            localStorage.setItem('certigenNetlifyDeployedData', globalDataStr);
+            sessionStorage.setItem('certigenNetlifyDeployedData', globalDataStr);
+          }
+        } catch (err) {
+          console.error("Error syncing Netlify data:", err);
+        }
+      };
+      
+      // Sync data immediately when admin dashboard loads
+      syncNetlifyData();
+      
       // Trigger storage event to refresh data across tabs
       const refreshEvent = new Event('adminRefresh');
       window.dispatchEvent(refreshEvent);
-      
-      // Also sync up any data in sessionStorage to localStorage for persistence
-      const sessionDataStr = sessionStorage.getItem('certigenDeployedData');
-      if (sessionDataStr) {
-        localStorage.setItem('certigenNetlifyStorage', sessionDataStr);
-      }
     } catch (err) {
       console.error("Error syncing admin data:", err);
     }

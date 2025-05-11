@@ -397,26 +397,25 @@ export const saveGeneratedCertificateData = (certificateData: CertificateData) =
     // Save to global storage
     localStorage.setItem('certigenGlobalCertificates', JSON.stringify(existingData));
     
-    // Also save to a server-synchronized key
-    // This helps with deployed environments and sharing data
+    // Also save to Netlify-specific storage to help with deployed environments
+    // This ensures certificates are accessible across sessions and devices
     try {
-      // Add timestamp to help with syncing
-      const syncData = {
+      // Create a separate copy for Netlify storage
+      const netlifyData = {
         ...existingData,
         lastUpdated: new Date().toISOString(),
         syncId: Math.random().toString(36).substring(2, 15)
       };
       
-      // Store in sessionStorage to share across tabs
-      sessionStorage.setItem('certigenDeployedData', JSON.stringify(syncData));
+      // Store in both localStorage and sessionStorage for better persistence and sharing
+      localStorage.setItem('certigenNetlifyDeployedData', JSON.stringify(netlifyData));
+      sessionStorage.setItem('certigenNetlifyDeployedData', JSON.stringify(netlifyData));
       
-      // Also store in localStorage with a different key for persistence
-      localStorage.setItem('certigenNetlifyStorage', JSON.stringify(syncData));
-      
-      // Keep backward compatibility
-      localStorage.setItem('certigenAdminData', JSON.stringify(existingData));
+      // Also store with the old keys for backward compatibility
+      localStorage.setItem('certigenNetlifyStorage', JSON.stringify(netlifyData));
+      sessionStorage.setItem('certigenDeployedData', JSON.stringify(netlifyData));
     } catch (err) {
-      console.error("Error syncing certificate data:", err);
+      console.error("Error syncing certificate data to Netlify storage:", err);
     }
     
     return certId;
@@ -435,6 +434,8 @@ export const getAllGeneratedCertificates = () => {
     // Array of storage keys to check, in order of priority
     const storageKeys = [
       { type: 'localStorage', key: 'certigenGlobalCertificates' },
+      { type: 'localStorage', key: 'certigenNetlifyDeployedData' },
+      { type: 'sessionStorage', key: 'certigenNetlifyDeployedData' },
       { type: 'localStorage', key: 'certigenNetlifyStorage' },
       { type: 'sessionStorage', key: 'certigenDeployedData' },
       { type: 'localStorage', key: 'certigenAdminData' }

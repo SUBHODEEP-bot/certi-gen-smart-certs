@@ -43,28 +43,113 @@ const AdminCertificateList = () => {
   const { toast } = useToast();
   
   const loadCertificates = () => {
+    // Force sync between storage locations first to ensure latest data
+    syncStorageData();
+    
     // Load certificates from all storage locations
     const loadedCertificates = getAllGeneratedCertificates();
     
-    // Check if we have new certificates
-    if (certificates.length !== loadedCertificates.length) {
-      setCertificates(loadedCertificates);
+    // Always update certificates to ensure we have the latest
+    setCertificates(loadedCertificates);
+    
+    // Notify if we found new certificates
+    if (certificates.length > 0 && loadedCertificates.length > certificates.length) {
+      toast({
+        title: "New Certificates Available",
+        description: `${loadedCertificates.length - certificates.length} new certificate(s) found.`
+      });
+    }
+  };
+  
+  // Sync data between storage locations to ensure consistent data
+  const syncStorageData = () => {
+    try {
+      // Collect all certificate data from various storage locations
+      const allStorageKeys = [
+        { type: 'localStorage', key: 'certigenGlobalCertificates' },
+        { type: 'localStorage', key: 'certigenNetlifyDeployedData' },
+        { type: 'sessionStorage', key: 'certigenNetlifyDeployedData' },
+        { type: 'localStorage', key: 'certigenNetlifyStorage' },
+        { type: 'sessionStorage', key: 'certigenDeployedData' }
+      ];
       
-      if (certificates.length > 0 && loadedCertificates.length > certificates.length) {
-        toast({
-          title: "New Certificates Available",
-          description: `${loadedCertificates.length - certificates.length} new certificate(s) found.`
-        });
-      }
-    } else {
-      // Check if any certificates have changed
-      const hasChanges = loadedCertificates.some((cert, index) => 
-        index < certificates.length && cert.id !== certificates[index].id
-      );
+      // Create a map to collect all unique certificates
+      const allCertsMap = new Map();
       
-      if (hasChanges) {
-        setCertificates(loadedCertificates);
+      // Function to safely parse JSON
+      const safelyParseData = (dataStr: string | null) => {
+        if (!dataStr) return null;
+        try {
+          return JSON.parse(dataStr);
+        } catch (e) {
+          console.error("Error parsing data:", e);
+          return null;
+        }
+      };
+      
+      // Collect all certificates from all storage locations
+      allStorageKeys.forEach(({ type, key }) => {
+        const storage = type === 'localStorage' ? localStorage : sessionStorage;
+        const dataStr = storage.getItem(key);
+        const data = safelyParseData(dataStr);
+        
+        if (data && Array.isArray(data.certificates)) {
+          data.certificates.forEach((cert: any) => {
+            if (cert && cert.id) {
+              allCertsMap.set(cert.id, cert);
+            }
+          });
+        }
+      });
+      
+      // Create consolidated data object with all unique certificates
+      const consolidatedCerts = Array.from(allCertsMap.values());
+      const today = format(new Date(), 'yyyy-MM-dd');
+      
+      // Calculate analytics
+      const topActivities: Record<string, number> = {};
+      const dailyStats: Record<string, number> = {};
+      
+      consolidatedCerts.forEach((cert: any) => {
+        const activity = cert.activity?.toLowerCase() || 'other';
+        topActivities[activity] = (topActivities[activity] || 0) + 1;
+        
+        const certDate = format(new Date(cert.generatedAt), 'yyyy-MM-dd');
+        dailyStats[certDate] = (dailyStats[certDate] || 0) + 1;
+      });
+      
+      // Create the consolidated data object
+      const consolidatedData = {
+        certificates: consolidatedCerts,
+        totalCertificates: consolidatedCerts.length,
+        revenue: consolidatedCerts.length * 2,
+        topActivities,
+        dailyStats,
+        lastUpdated: new Date().toISOString(),
+        syncId: Math.random().toString(36).substring(2, 15)
+      };
+      
+      // Update all storage locations with the consolidated data
+      localStorage.setItem('certigenGlobalCertificates', JSON.stringify(consolidatedData));
+      localStorage.setItem('certigenNetlifyDeployedData', JSON.stringify(consolidatedData));
+      sessionStorage.setItem('certigenNetlifyDeployedData', JSON.stringify(consolidatedData));
+      localStorage.setItem('certigenNetlifyStorage', JSON.stringify(consolidatedData));
+      sessionStorage.setItem('certigenDeployedData', JSON.stringify(consolidatedData));
+      
+      // Also update admin data for backward compatibility
+      localStorage.setItem('certigenAdminData', JSON.stringify(consolidatedData));
+      
+      // Dispatch a storage event to notify other tabs
+      try {
+        window.dispatchEvent(new Event('storage'));
+      } catch (e) {
+        console.error("Error dispatching storage event:", e);
       }
+      
+      return consolidatedData;
+    } catch (err) {
+      console.error("Error syncing storage data:", err);
+      return null;
     }
   };
   
@@ -74,33 +159,35 @@ const AdminCertificateList = () => {
       clearInterval(pollingIntervalId);
     }
     
-    // Check for updates every 15 seconds
+    // Check for updates every 5 seconds (more frequent than before)
     const intervalId = window.setInterval(() => {
       loadCertificates();
-    }, 15000);
+    }, 5000);
     
     setPollingIntervalId(intervalId);
   };
   
   useEffect(() => {
-    // Initial load
+    // Initial sync and load
+    syncStorageData();
     loadCertificates();
     
     // Start polling for updates
     startPolling();
     
-    // Add a one-time storage event listener for cross-tab communication
-    const handleStorageChange = (event: StorageEvent) => {
-      if (
-        event.key === 'certigenGlobalCertificates' || 
-        event.key === 'certigenNetlifyStorage' || 
-        event.key === 'certigenDeployedData'
-      ) {
-        loadCertificates();
-      }
+    // Add storage event listeners for cross-tab communication
+    const handleStorageChange = () => {
+      loadCertificates();
+    };
+    
+    // Add custom event for admin refresh
+    const handleAdminRefresh = () => {
+      syncStorageData();
+      loadCertificates();
     };
     
     window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('adminRefresh', handleAdminRefresh);
     
     // Clean up on component unmount
     return () => {
@@ -108,6 +195,7 @@ const AdminCertificateList = () => {
         clearInterval(pollingIntervalId);
       }
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('adminRefresh', handleAdminRefresh);
     };
   }, []);
   
@@ -205,12 +293,19 @@ const AdminCertificateList = () => {
   
   const handleRefresh = () => {
     setIsRefreshing(true);
+    
+    // Sync data across storage locations
+    syncStorageData();
+    
+    // Load certificates
     loadCertificates();
-    startPolling(); // Restart the polling on manual refresh
+    
+    // Restart polling
+    startPolling();
     
     toast({
       title: "Refreshed",
-      description: "Certificate list has been refreshed."
+      description: "Certificate list has been refreshed and synchronized."
     });
     
     setTimeout(() => setIsRefreshing(false), 1000);
