@@ -13,7 +13,7 @@ import {
 import { format } from 'date-fns';
 import CertificatePreview from './CertificatePreview';
 import { getAllGeneratedCertificates, generatePdf } from '@/utils/certificate';
-import { Eye, Download, Trash2 } from 'lucide-react';
+import { Eye, Download, Trash2, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
@@ -38,18 +38,32 @@ const AdminCertificateList = () => {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
   
-  useEffect(() => {
+  const loadCertificates = () => {
     // Load certificates from global storage
     const loadedCertificates = getAllGeneratedCertificates();
     
-    // Sort by date (newest first)
+    // Sort by date (newest first) - though getAllGeneratedCertificates now does this already
     loadedCertificates.sort((a: Certificate, b: Certificate) => {
       return new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime();
     });
     
     setCertificates(loadedCertificates);
+  };
+  
+  useEffect(() => {
+    // Initial load
+    loadCertificates();
+    
+    // Set up interval to refresh certificates periodically (every 30 seconds)
+    const refreshInterval = setInterval(() => {
+      loadCertificates();
+    }, 30000);
+    
+    // Clean up interval on component unmount
+    return () => clearInterval(refreshInterval);
   }, []);
   
   const handlePreview = (certificate: Certificate) => {
@@ -87,31 +101,60 @@ const AdminCertificateList = () => {
   
   const handleDelete = (index: number) => {
     try {
-      // Get current global data
-      const data = JSON.parse(localStorage.getItem('certigenGlobalCertificates') || '{}');
+      // Get current certificates
+      const updatedCertificates = [...certificates];
+      
+      // Store the ID of the certificate we're deleting
+      const deletedCertId = updatedCertificates[index].id;
       
       // Remove certificate at specified index
-      if (data.certificates && data.certificates.length > index) {
-        data.certificates.splice(index, 1);
-        data.totalCertificates = data.certificates.length;
-        
-        // Recalculate revenue
-        data.revenue = data.certificates.reduce((sum: number, cert: any) => sum + (cert.price || 0), 0);
-        
-        // Update global storage
-        localStorage.setItem('certigenGlobalCertificates', JSON.stringify(data));
-        
-        // Also update admin data to stay in sync
-        localStorage.setItem('certigenAdminData', JSON.stringify(data));
-        
-        // Update state
-        setCertificates(data.certificates);
-        
-        toast({
-          title: "Certificate Deleted",
-          description: "Certificate has been deleted successfully."
-        });
+      updatedCertificates.splice(index, 1);
+      
+      // Update state
+      setCertificates(updatedCertificates);
+      
+      // Update all storage locations
+      
+      // 1. Update global storage
+      const globalDataStr = localStorage.getItem('certigenGlobalCertificates');
+      if (globalDataStr) {
+        const globalData = JSON.parse(globalDataStr);
+        if (globalData.certificates) {
+          globalData.certificates = globalData.certificates.filter((cert: any) => cert.id !== deletedCertId);
+          globalData.totalCertificates = globalData.certificates.length;
+          globalData.revenue = globalData.certificates.length * 2;
+          localStorage.setItem('certigenGlobalCertificates', JSON.stringify(globalData));
+        }
       }
+      
+      // 2. Update session storage
+      const sessionDataStr = sessionStorage.getItem('certigenDeployedData');
+      if (sessionDataStr) {
+        const sessionData = JSON.parse(sessionDataStr);
+        if (sessionData.certificates) {
+          sessionData.certificates = sessionData.certificates.filter((cert: any) => cert.id !== deletedCertId);
+          sessionData.totalCertificates = sessionData.certificates.length;
+          sessionData.revenue = sessionData.certificates.length * 2;
+          sessionStorage.setItem('certigenDeployedData', JSON.stringify(sessionData));
+        }
+      }
+      
+      // 3. Update admin data
+      const adminDataStr = localStorage.getItem('certigenAdminData');
+      if (adminDataStr) {
+        const adminData = JSON.parse(adminDataStr);
+        if (adminData.certificates) {
+          adminData.certificates = adminData.certificates.filter((cert: any) => cert.id !== deletedCertId);
+          adminData.totalCertificates = adminData.certificates.length;
+          adminData.revenue = adminData.certificates.length * 2;
+          localStorage.setItem('certigenAdminData', JSON.stringify(adminData));
+        }
+      }
+      
+      toast({
+        title: "Certificate Deleted",
+        description: "Certificate has been deleted successfully."
+      });
     } catch (error) {
       toast({
         title: "Delete Failed",
@@ -120,10 +163,32 @@ const AdminCertificateList = () => {
       });
     }
   };
+  
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    loadCertificates();
+    
+    toast({
+      title: "Refreshed",
+      description: "Certificate list has been refreshed."
+    });
+    
+    setTimeout(() => setIsRefreshing(false), 1000);
+  };
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-4">Generated Certificates</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold">Generated Certificates</h2>
+        <Button 
+          variant="outline" 
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
+      </div>
       
       {certificates.length === 0 ? (
         <div className="bg-gray-50 p-8 text-center rounded-lg border border-gray-200">
@@ -144,7 +209,7 @@ const AdminCertificateList = () => {
           </TableHeader>
           <TableBody>
             {certificates.map((certificate, index) => (
-              <TableRow key={index}>
+              <TableRow key={certificate.id || index}>
                 <TableCell className="font-medium">{certificate.fullName}</TableCell>
                 <TableCell>{certificate.collegeName}</TableCell>
                 <TableCell>{certificate.activity}</TableCell>
