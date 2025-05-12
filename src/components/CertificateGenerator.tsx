@@ -14,7 +14,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
