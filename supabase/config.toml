@@ -1,1 +1,8 @@
+
 project_id = "bgbeskcqdesfsbgxggds"
+
+[functions.update_schema]
+verify_jwt = false
+
+[functions.add_generated_by_column]
+verify_jwt = false
